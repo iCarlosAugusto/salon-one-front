@@ -1,11 +1,11 @@
-import { BadgeCheck, Clock3, MapPin, ShieldCheck } from "lucide-react";
+import { BadgeCheck, Clock3, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger as SheetTriggerBase } from "@/components/ui/sheet";
-
-const SheetTrigger = SheetTriggerBase as React.ComponentType<React.ComponentProps<typeof SheetTriggerBase> & React.RefAttributes<HTMLButtonElement>>;
+import { ServiceCard } from "./client-components/service-card";
+import { BookingSummary } from "./client-components/booking-summary";
+import { MobileBottomBar } from "./client-components/mobile-bottom-bar";
+import { BookingProvider } from "./client-components/booking-provider";
 
 type Service = {
   id: string;
@@ -151,29 +151,6 @@ async function getEmployeeServices(id: string): Promise<Service[] | null> {
   return services;
 }
 
-function ServiceCard({ service, currency }: { service: Service; currency: string | null }) {
-  return (
-    <div className="group flex gap-3 rounded-sm border border-slate-200 bg-white p-4 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.12)] transition hover:-translate-y-0.5 hover:border-slate-300">
-      <div className="flex-1 space-y-2">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-base font-semibold text-slate-900">{service.name}</p>
-            <p className="text-sm text-slate-500">{service.description ?? "Serviço premium com finalização exclusiva."}</p>
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Badge variant="outline">
-            <Clock3 className="h-4 w-4" /> {formatDuration(service.duration)}
-          </Badge>
-          <Badge variant="default">
-            {formatCurrency(service.price, currency)}
-          </Badge>
-        </div>
-      </div>
-    </div>
-  );
-}
-
 export default async function Booking() {
   const [salon, employee, employeeServices] = await Promise.all([
     getSalonById("742e6600-9175-4524-aa15-1d9b39dcb282"),
@@ -183,6 +160,9 @@ export default async function Booking() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 text-slate-900">
+      {/* Booking Provider - sets employee in store */}
+      <BookingProvider employee={employee} salonSlug={salon?.slug} />
+      
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 pb-32 sm:px-6 lg:px-8 lg:py-12 lg:pb-12">
         <div className="flex items-center justify-between gap-3">
           <div className="flex items-center gap-3">
@@ -228,52 +208,13 @@ export default async function Booking() {
           </div>
 
           <aside className="w-full max-w-xl space-y-4 self-start lg:w-80 hidden lg:block">
-            <Card className="overflow-hidden border-slate-200 shadow-[0_18px_60px_-28px_rgba(15,23,42,0.32)]">
-              <CardHeader className="space-y-1">
-                <CardTitle className="flex items-start justify-between text-lg">
-                  <span className="flex flex-1 flex-col text-slate-900">
-                    {employee?.firstName ?? ""}
-                    <span className="text-sm font-normal text-slate-500">{salon?.name ?? ""}</span>
-                  </span>
-                </CardTitle>
-                <CardDescription className="flex items-center gap-2 text-sm text-slate-600">
-                  <MapPin className="h-4 w-4" /> {salon?.city ?? "Cidade"} · {salon?.state ?? "Estado"}
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4 p-6 text-sm text-slate-700">
-                <div className="space-y-3">
-                  {employeeServices?.slice(0, 1).map((service) => (
-                    <div key={service.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3">
-                      <div className="space-y-0.5">
-                        <p className="text-sm font-semibold text-slate-900">{service.name}</p>
-                        <p className="text-xs text-slate-500">{formatDuration(service.duration)}</p>
-                      </div>
-                      <p className="text-sm font-semibold text-slate-900">{formatCurrency(service.price, salon?.currency ?? null)}</p>
-                    </div>
-                  ))}
-                </div>
-
-                <div className="space-y-2 rounded-2xl bg-slate-50 p-3">
-                  <div className="flex items-center justify-between text-sm text-slate-600">
-                    <span>Total</span>
-                    <span className="font-semibold text-slate-900">{formatCurrency(80, salon?.currency ?? null)}</span>
-                  </div>
-                </div>
-
-                <div className="space-y-2 rounded-2xl bg-indigo-50 p-4 text-indigo-900">
-                  <p className="text-sm font-semibold">Políticas rápidas</p>
-                  <ul className="list-disc space-y-1 pl-4 text-xs text-indigo-800">
-                    <li>Cancelamento sem custo até {salon?.minAdvanceBookingHours ?? 2}h antes.</li>
-                    <li>Pagamento no local ou confirmação online segura.</li>
-                    <li>Horários atualizados em tempo real.</li>
-                  </ul>
-                </div>
-
-                <Button className="w-full rounded-full bg-indigo-600 text-base font-semibold hover:bg-indigo-700">
-                  Continuar
-                </Button>
-              </CardContent>
-            </Card>
+            <BookingSummary 
+              employeeName={employee?.firstName ?? null}
+              salonName={salon?.name ?? null}
+              salonCity={salon?.city ?? null}
+              salonState={salon?.state ?? null}
+              currency={salon?.currency ?? null}
+            />
 
             <Card className="border-slate-200">
               <CardHeader>
@@ -297,24 +238,9 @@ export default async function Booking() {
             </Card>
           </aside>
         </div>
-        <div className="fixed border-t border-t-black bottom-0 left-0 right-0 z-50 flex flex-col gap-2 bg-white px-4 py-4 shadow-[0_-4px_16px_rgba(0,0,0,0.1)] lg:hidden">
-          <div className="flex flex-col justify-between">
-            <span className="text-sm font-semibold text-slate-900">a partir de R$ 297,00</span>
-            <span className="text-sm font-normal text-slate-500">1 serviço • 2 h e 25 min</span>
-          </div>
-          <Sheet>
-            <SheetTrigger asChild>
-              <Button className="w-full rounded-full bg-indigo-600 text-base font-semibold hover:bg-indigo-700">
-                Continuar
-              </Button>
-            </SheetTrigger>
-            <SheetContent side="bottom" className="h-full">
-              <SheetHeader>
-                <SheetTitle>Selecionar horário</SheetTitle>
-              </SheetHeader>
-            </SheetContent>
-          </Sheet>
-        </div>
+        
+        {/* Mobile Bottom Bar */}
+        <MobileBottomBar currency={salon?.currency ?? null} />
       </div>
     </div>
   );

@@ -13,8 +13,12 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { cn } from "@/lib/utils";
+import { useBookingStore } from "@/lib/store/booking-store";
+import { useRouter } from "next/navigation";
+import { BookingTimer } from "@/components/booking-timer";
+import { BookingExpiryAlert } from "@/components/booking-expiry-alert";
 
 type Employee = {
   id: string;
@@ -228,19 +232,41 @@ const generateTimeSlots = (): TimeSlot[] => {
 };
 
 export default function HoursPage() {
-  const [selectedEmployee, setSelectedEmployee] = useState<Employee>(EMPLOYEES[0]);
+  const router = useRouter();
+  
+  // Zustand store
+  const { 
+    selectedServices, 
+    selectedEmployee, 
+    selectedDate: storeSelectedDate,
+    selectedTime: storeSelectedTime,
+    setDate: setStoreDate,
+    setTime: setStoreTime,
+    getTotalDuration,
+    getTotalPrice
+  } = useBookingStore();
+
+  // Local state
   const [currentDate, setCurrentDate] = useState(new Date(2025, 11, 1)); // December 2025
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [selectedTime, setSelectedTime] = useState<string | null>(null);
-  const [isEmployeeDropdownOpen, setIsEmployeeDropdownOpen] = useState(false);
-  const [isCalendarOpen, setIsCalendarOpen] = useState(true);
   const [animationDirection, setAnimationDirection] = useState<'left' | 'right'>('right');
+
+  // Sync store date with local state on mount
+  useEffect(() => {
+    if (storeSelectedDate) {
+      const dateFromStore = new Date(storeSelectedDate);
+      setCurrentDate(new Date(dateFromStore.getFullYear(), dateFromStore.getMonth(), 1));
+    }
+  }, []);
 
   const calendarDays = useMemo(() => generateCalendarDays(currentDate), [currentDate]);
   const timeSlots = generateTimeSlots();
   
-  const totalDuration = SELECTED_SERVICES.reduce((sum, service) => sum + service.duration, 0);
-  const totalPrice = SELECTED_SERVICES.reduce((sum, service) => sum + service.price, 0);
+  const totalDuration = getTotalDuration();
+  const totalPrice = getTotalPrice();
+
+  // Convert store date back to Date object for comparison
+  const selectedDate = storeSelectedDate ? new Date(storeSelectedDate) : null;
+  const selectedTime = storeSelectedTime;
 
   const monthYear = currentDate.toLocaleDateString("pt-BR", { 
     month: "long", 
@@ -265,13 +291,26 @@ export default function HoursPage() {
 
   const handleDateSelect = (day: typeof calendarDays[0]) => {
     if (day.isAvailable && day.isCurrentMonth) {
-      setSelectedDate(day.fullDate);
-      setSelectedTime(null); // Reset time when date changes
+      setStoreDate(day.fullDate);
+      setStoreTime(null); // Reset time when date changes
+    }
+  };
+
+  const handleTimeSelect = (time: string) => {
+    setStoreTime(time);
+  };
+
+  const handleContinue = () => {
+    if (selectedDate && selectedTime) {
+      router.push('/confirm');
     }
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100">
+      {/* Expiry Alert Modal */}
+      <BookingExpiryAlert />
+      
       {/* Desktop Header with Breadcrumb */}
       <div className="hidden lg:block border-b border-slate-200 bg-white">
         <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
@@ -329,6 +368,12 @@ export default function HoursPage() {
             <h1 className="hidden text-3xl font-semibold text-slate-900 lg:block">
               Selecionar horário
             </h1>
+
+            {/* Booking Timer */}
+            <BookingTimer />
+
+            <span>SELECINADO:{JSON.stringify(selectedEmployee)}</span>
+            <span>selecionado: {JSON.stringify(selectedServices)}</span>
 
             {/* Employee Selector and Calendar Button */}
             <div className="flex items-center justify-between gap-3">
@@ -475,7 +520,7 @@ export default function HoursPage() {
                 {timeSlots.map((slot, index) => (
                   <button
                     key={slot.time}
-                    onClick={() => slot.available && setSelectedTime(slot.time)}
+                    onClick={() => slot.available && handleTimeSelect(slot.time)}
                     disabled={!slot.available}
                     style={{ 
                       animationDelay: `${index * 50}ms`,
@@ -567,36 +612,45 @@ export default function HoursPage() {
               <CardContent className="space-y-4 p-6">
                 {/* Selected Services */}
                 <div className="space-y-3">
-                  {SELECTED_SERVICES.map((service) => (
-                    <div
-                      key={service.id}
-                      className="flex items-start justify-between gap-3 rounded-xl bg-slate-50 p-3"
-                    >
-                      <div className="flex-1 space-y-0.5">
-                        <p className="text-sm font-semibold text-slate-900">{service.name}</p>
-                        <p className="text-xs text-slate-500">
-                          {formatDuration(service.duration)} com {service.employee}
+                  {selectedServices.length === 0 ? (
+                    <div className="rounded-xl bg-slate-50 p-6 text-center">
+                      <p className="text-sm text-slate-500">Nenhum serviço selecionado</p>
+                    </div>
+                  ) : (
+                    selectedServices.map((service) => (
+                      <div
+                        key={service.id}
+                        className="flex items-start justify-between gap-3 rounded-xl bg-slate-50 p-3"
+                      >
+                        <div className="flex-1 space-y-0.5">
+                          <p className="text-sm font-semibold text-slate-900">{service.name}</p>
+                          <p className="text-xs text-slate-500">
+                            {formatDuration(service.duration)} {selectedEmployee ? `com ${selectedEmployee.firstName}` : ''}
+                          </p>
+                        </div>
+                        <p className="text-sm font-semibold text-slate-900">
+                          a partir de {formatCurrency(parseFloat(service.price))}
                         </p>
                       </div>
-                      <p className="text-sm font-semibold text-slate-900">
-                        a partir de {formatCurrency(service.price)}
-                      </p>
-                    </div>
-                  ))}
+                    ))
+                  )}
                 </div>
 
                 {/* Total */}
-                <div className="rounded-2xl bg-slate-900 p-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-semibold text-white">Total</span>
-                    <span className="text-lg font-bold text-white">
-                      a partir de {formatCurrency(totalPrice)}
-                    </span>
+                {selectedServices.length > 0 && (
+                  <div className="rounded-2xl bg-slate-900 p-4">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-semibold text-white">Total</span>
+                      <span className="text-lg font-bold text-white">
+                        a partir de {formatCurrency(totalPrice)}
+                      </span>
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Continue Button */}
                 <Button 
+                  onClick={handleContinue}
                   className={cn(
                     "w-full rounded-full py-6 text-base font-semibold transition-all duration-300",
                     selectedTime 
@@ -618,14 +672,15 @@ export default function HoursPage() {
             <div className="flex items-center justify-between">
               <div className="flex flex-col">
                 <span className="text-sm font-semibold text-slate-900">
-                  a partir de {formatCurrency(totalPrice)}
+                  {selectedServices.length === 0 ? "Nenhum serviço" : `a partir de ${formatCurrency(totalPrice)}`}
                 </span>
                 <span className="text-xs text-slate-500">
-                  {SELECTED_SERVICES.length} {SELECTED_SERVICES.length === 1 ? "serviço" : "serviços"} • {formatDuration(totalDuration)}
+                  {selectedServices.length} {selectedServices.length === 1 ? "serviço" : "serviços"} • {formatDuration(totalDuration)}
                 </span>
               </div>
             </div>
             <Button 
+              onClick={handleContinue}
               className={cn(
                 "w-full rounded-full py-6 text-base font-semibold transition-all duration-300",
                 selectedTime 
