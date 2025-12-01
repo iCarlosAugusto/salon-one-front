@@ -61,7 +61,7 @@ async function getEmployees(): Promise<Employee[]> {
   return employees;
 }
 
-async function getServicesBySalonSlug(salonSlug: string): Promise<Service[] > {
+async function getServicesBySalonSlug(salonSlug: string): Promise<Service[]> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL;
   if (!baseUrl) {
     return [];
@@ -82,7 +82,7 @@ export default async function Home() {
     getEmployees(),
     getServicesBySalonSlug("barber-top"),
   ]);
- 
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 text-slate-900">
       <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-12 lg:px-8 lg:py-16">
@@ -155,29 +155,31 @@ export default async function Home() {
 
             <div className="space-y-4">
               {services.map((service) => (
-                <Card key={service.id} className="overflow-hidden border-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
-                  <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="space-y-1">
-                      <div className="flex flex-wrap items-center gap-3">
-                        <CardTitle className="text-lg font-semibold">{service.name}</CardTitle>
-                        <Badge variant="default">
-                          {formatCurrency(service.price, salon.currency)}
-                        </Badge>
-                        <Badge variant="outline">
-                          <Clock3 className="h-4 w-4" /> {service.duration} min
-                        </Badge>
+                <Link key={service.id} href={`/professionals?serviceId=${service.id}`} className="center">
+                  <Card className="overflow-hidden border-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
+                    <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="space-y-1">
+                        <div className="flex flex-wrap items-center gap-3">
+                          <CardTitle className="text-lg font-semibold">{service.name}</CardTitle>
+                          <Badge variant="default">
+                            {formatCurrency(service.price, salon.currency)}
+                          </Badge>
+                          <Badge variant="outline">
+                            <Clock3 className="h-4 w-4" /> {service.duration} min
+                          </Badge>
+                        </div>
+                        <CardDescription className="text-sm text-slate-600">
+                          {service.description ?? "Serviço rápido com acabamento profissional."}
+                        </CardDescription>
                       </div>
-                      <CardDescription className="text-sm text-slate-600">
-                        {service.description ?? "Serviço rápido com acabamento profissional."}
-                      </CardDescription>
+                      <div className="flex w-full flex-col items-stretch gap-3 text-sm text-slate-500 sm:w-auto sm:items-end">
+                        <Button className="w-full gap-2 sm:w-auto" variant="secondary">
+                          Agendar
+                        </Button>
+                      </div>
                     </div>
-                    <div className="flex w-full flex-col items-stretch gap-3 text-sm text-slate-500 sm:w-auto sm:items-end">
-                      <Button className="w-full gap-2 sm:w-auto" variant="secondary">
-                        Agendar
-                      </Button>
-                    </div>
-                  </div>
-                </Card>
+                  </Card>
+                </Link>
               ))}
               {services.length === 0 && (
                 <Card>
@@ -196,18 +198,18 @@ export default async function Home() {
 
               <div className="flex space-x-4 overflow-x-auto">
                 {employees.map((member) => (
-                    <Link key={member.firstName} href={`/booking?employeeId=${member.id}`} className="center">
-                        <div className="flex flex-col items-center gap-2">
-                            <Avatar className="h-18 w-18">
-                                <AvatarImage src={member.avatar ?? ""} alt={member.firstName} />
-                                <AvatarFallback>{member.firstName.charAt(0)}</AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col items-center gap-1">
-                                <span className="text-sm font-semibold text-slate-800">{member.firstName}</span>
-                                <span className="text-xs text-slate-500">{member.role}</span>
-                            </div>
-                        </div>
-                    </Link>
+                  <Link key={member.firstName} href={`/booking?employeeId=${member.id}`} className="center">
+                    <div className="flex flex-col items-center gap-2">
+                      <Avatar className="h-18 w-18">
+                        <AvatarImage src={member.avatar ?? ""} alt={member.firstName} />
+                        <AvatarFallback>{member.firstName.charAt(0)}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex flex-col items-center gap-1">
+                        <span className="text-sm font-semibold text-slate-800">{member.firstName}</span>
+                        <span className="text-xs text-slate-500">{member.role}</span>
+                      </div>
+                    </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -252,22 +254,22 @@ export default async function Home() {
               </div>
             </div>
             <div className="flex sm:flex-row flex-col gap-4">
-                <div className="flex flex-col gap-1">
-                    <span className="text-xl font-semibold">Horário de funcionamento</span>
-                    <span className="text-sm text-slate-500">Segunda a sexta-feira: 09:00 - 18:00</span>
-                    <span className="text-sm text-slate-500">Sábado: 09:00 - 12:00</span>
-                    <span className="text-sm text-slate-500">Domingo: 09:00 - 12:00</span>
-                    <span className="text-sm text-slate-500">Feriados: 09:00 - 12:00</span>
-                    <span className="text-sm text-slate-500">Feriados: 08:00 - 12:00</span>
-                    <span className="text-sm text-slate-500">Feriados: 08:00 - 12:00</span>
-                </div>
-                <div className="flex flex-col gap-1 ml-12">
-                    <span className="text-xl font-semibold">Mais informaçõesq</span>
-                    <span className="text-sm text-slate-500">Mais informações</span>
-                    <span className="text-sm text-slate-500">Mais informações</span>
-                </div>
+              <div className="flex flex-col gap-1">
+                <span className="text-xl font-semibold">Horário de funcionamento</span>
+                <span className="text-sm text-slate-500">Segunda a sexta-feira: 09:00 - 18:00</span>
+                <span className="text-sm text-slate-500">Sábado: 09:00 - 12:00</span>
+                <span className="text-sm text-slate-500">Domingo: 09:00 - 12:00</span>
+                <span className="text-sm text-slate-500">Feriados: 09:00 - 12:00</span>
+                <span className="text-sm text-slate-500">Feriados: 08:00 - 12:00</span>
+                <span className="text-sm text-slate-500">Feriados: 08:00 - 12:00</span>
+              </div>
+              <div className="flex flex-col gap-1 ml-12">
+                <span className="text-xl font-semibold">Mais informaçõesq</span>
+                <span className="text-sm text-slate-500">Mais informações</span>
+                <span className="text-sm text-slate-500">Mais informações</span>
+              </div>
             </div>
-    
+
           </section>
 
           <aside className="sticky top-6 space-y-6">
