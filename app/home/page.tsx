@@ -16,6 +16,7 @@ import {
 import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import Link from "next/link";
 
 type Service = {
   id: string;
@@ -295,7 +296,7 @@ export default async function Home() {
               </div>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 {team.map((member) => (
-                    <div key={member.name} className="center">
+                    <Link key={member.name} href={`/booking`} className="center">
                         <div className="flex flex-col items-center gap-2">
                             <Avatar className="h-18 w-18">
                                 <AvatarImage src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" alt={member.name} />
@@ -306,7 +307,7 @@ export default async function Home() {
                                 <span className="text-xs text-slate-500">{member.role}</span>
                             </div>
                         </div>
-                    </div>
+                    </Link>
                 ))}
               </div>
             </div>
