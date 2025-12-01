@@ -98,7 +98,7 @@ async function getSalon(): Promise<Salon | null> {
       })),
     };
   } catch (error) {
-    console.error("Falha ao carregar dados da barbearia", error);
+    console.error("Falha ao carregar dados do salão", error);
     return null;
   }
 }
@@ -112,7 +112,7 @@ async function getEmployeeById(id: string): Promise<Employee | null> {
     next: { revalidate: false },
   });
   if (!response.ok) {
-    console.error("Falha ao carregar dados do funcionário", response.status);
+    console.error("Falha ao carregar dados do profissional", response.status);
     return null;
   }
   const employee = (await response.json()) as Employee;
@@ -128,7 +128,7 @@ async function getSalonById(id: string): Promise<Salon | null> {
     next: { revalidate: false },
   });
   if (!response.ok) {
-    console.error("Falha ao carregar dados da barbearia", response.status);
+    console.error("Falha ao carregar dados do salão", response.status);
     return null;
   }
   const salon = (await response.json()) as Salon;
@@ -144,7 +144,7 @@ async function getEmployeeServices(id: string): Promise<Service[] | null> {
     next: { revalidate: false },
   });
   if (!response.ok) {
-    console.error("Falha ao carregar dados dos serviços do funcionário", response.status);
+    console.error("Falha ao carregar dados dos serviços do profissional", response.status);
     return [];
   }
   const services = (await response.json()) as Service[];
@@ -155,10 +155,10 @@ export default async function Booking({ searchParams }: { searchParams: Promise<
   const { employeeId } = await searchParams;
 
   if (!employeeId) {
-    return <div>Funcionário não encontrado</div>;
+    return <div>Profissional não encontrado</div>;
   }
   const [salon, employee, employeeServices] = await Promise.all([
-    getSalonById("742e6600-9175-4524-aa15-1d9b39dcb282"),
+    getSalonById("7e446c70-e87c-4ed3-a288-40171faae563"),
     getEmployeeById(employeeId),
     getEmployeeServices(employeeId),
   ]);
