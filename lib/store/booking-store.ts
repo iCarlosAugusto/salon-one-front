@@ -218,7 +218,7 @@ export const useBookingStore = create<BookingState>()(
       partialize: (state) => ({
         selectedServices: state.selectedServices,
         selectedEmployee: state.selectedEmployee,
-        selectedDate: state.selectedDate ? state.selectedDate.toISOString() : null,
+        selectedDate: null,//state.selectedDate ? state.selectedDate.toISOString() : null,
         selectedTime: state.selectedTime,
         salonSlug: state.salonSlug,
         bookingStartedAt: state.bookingStartedAt,
