@@ -414,7 +414,7 @@ export default async function Booking() {
             </SheetTrigger>
             <SheetContent side="bottom" className="h-full">
               <SheetHeader>
-                <SheetTitle></SheetTitle>
+                <SheetTitle>Selecionar horário</SheetTitle>
               </SheetHeader>
             </SheetContent>
           </Sheet>
