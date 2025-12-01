@@ -236,7 +236,7 @@ export default async function Home() {
 
               <div className="flex space-x-4 overflow-x-auto">
                 {employees.map((member) => (
-                    <Link key={member.firstName} href={`/booking`} className="center">
+                    <Link key={member.firstName} href={`/booking?employeeId=${member.id}`} className="center">
                         <div className="flex flex-col items-center gap-2">
                             <Avatar className="h-18 w-18">
                                 <AvatarImage src={member.avatar ?? ""} alt={member.firstName} />

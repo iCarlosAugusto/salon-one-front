@@ -5,13 +5,21 @@ import { Badge } from "@/components/ui/badge";
 import { useBookingStore, type Service } from "@/lib/store/booking-store";
 import { cn } from "@/lib/utils";
 
-const formatCurrency = (value: string | number, currency: string | null = "BRL") =>
-  new Intl.NumberFormat("pt-BR", {
+const formatCurrency = (value: string | number, currency: string | null = "BRL") =>{
+  //Format pattern: 20.00
+  if (typeof value === "string") {
+    value = parseFloat(value);
+  }
+  if (isNaN(value)) {
+    return "0.00";
+  }
+  return new Intl.NumberFormat("pt-BR", {
     style: "currency",
     currency: currency ?? "BRL",
-    minimumFractionDigits: 2,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
   }).format(Number(value));
-
+}
 const formatDuration = (minutes: number) => {
   if (minutes < 60) return `${minutes} min`;
   const hours = Math.floor(minutes / 60);
@@ -28,7 +36,7 @@ type ServiceCardProps = {
 export function ServiceCard({ service, currency }: ServiceCardProps) {
   const { toggleService, isServiceSelected } = useBookingStore();
   const isSelected = isServiceSelected(service.id);
-
+  console.log("SERVICE", service);
   return (
     <button
       onClick={() => toggleService(service)}

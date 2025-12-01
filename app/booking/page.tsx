@@ -109,7 +109,7 @@ async function getEmployeeById(id: string): Promise<Employee | null> {
     return null;
   }
   const response = await fetch(`${baseUrl}/employees/${id}`, {
-    next: { revalidate: 60 },
+    next: { revalidate: false },
   });
   if (!response.ok) {
     console.error("Falha ao carregar dados do funcionário", response.status);
@@ -125,7 +125,7 @@ async function getSalonById(id: string): Promise<Salon | null> {
     return null;
   }
   const response = await fetch(`${baseUrl}/salons/${id}`, {
-    next: { revalidate: 60 },
+    next: { revalidate: false },
   });
   if (!response.ok) {
     console.error("Falha ao carregar dados da barbearia", response.status);
@@ -141,7 +141,7 @@ async function getEmployeeServices(id: string): Promise<Service[] | null> {
     return [];
   }
   const response = await fetch(`${baseUrl}/employees/${id}/services`, {
-    next: { revalidate: 60 },
+    next: { revalidate: false },
   });
   if (!response.ok) {
     console.error("Falha ao carregar dados dos serviços do funcionário", response.status);
@@ -151,11 +151,16 @@ async function getEmployeeServices(id: string): Promise<Service[] | null> {
   return services;
 }
 
-export default async function Booking() {
+export default async function Booking({ searchParams }: { searchParams: Promise<{ employeeId?: string }> }) {
+  const { employeeId } = await searchParams;
+
+  if (!employeeId) {
+    return <div>Funcionário não encontrado</div>;
+  }
   const [salon, employee, employeeServices] = await Promise.all([
     getSalonById("742e6600-9175-4524-aa15-1d9b39dcb282"),
-    getEmployeeById("742e6600-9175-4524-aa15-1d9b39dcb282"),
-    getEmployeeServices("742e6600-9175-4524-aa15-1d9b39dcb282"),
+    getEmployeeById(employeeId),
+    getEmployeeServices(employeeId),
   ]);
 
   return (
@@ -225,10 +230,6 @@ export default async function Booking() {
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 text-emerald-500" />
                   <span>{salon?.allowOnlineBooking ? "Reservas online ativadas" : "Apenas agendamento no local"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock3 className="h-4 w-4 text-indigo-500" />
-                  <span>Intervalos de {salon?.defaultSlotInterval ?? 0} minutos</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <BadgeCheck className="h-4 w-4 text-amber-500" />

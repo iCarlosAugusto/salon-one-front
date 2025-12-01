@@ -371,10 +371,6 @@ export default function HoursPage() {
 
             {/* Booking Timer */}
             <BookingTimer />
-
-            <span>SELECINADO:{JSON.stringify(selectedEmployee)}</span>
-            <span>selecionado: {JSON.stringify(selectedServices)}</span>
-
             {/* Employee Selector and Calendar Button */}
             <div className="flex items-center justify-between gap-3">
               <div className="flex items-center gap-2">
