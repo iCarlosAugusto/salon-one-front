@@ -1,60 +1,7 @@
 import { ServiceCard } from "./client-components/service-card";
 import { BookingProvider } from "./client-components/booking-provider";
 import { BookingFlow } from "@/components/booking-flow";
-
-type Service = {
-  id: string;
-  salonId: string;
-  name: string;
-  description: string | null;
-  price: string;
-  duration: number;
-  category: "featured" | "services" | "combos" | null;
-  imageUrl: string | null;
-  isActive: boolean;
-};
-
-type Salon = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
-  city: string | null;
-  state: string | null;
-  zipCode: string | null;
-  country: string | null;
-  logo: string | null;
-  coverImage: string | null;
-  website: string | null;
-  timezone: string | null;
-  currency: string | null;
-  allowOnlineBooking: boolean;
-  requireBookingApproval: boolean;
-  defaultSlotInterval: number | null;
-  maxAdvanceBookingDays: number | null;
-  minAdvanceBookingHours: number | null;
-  isActive: boolean;
-  services: Service[];
-};
-
-type Employee = {
-  id: string;
-  salonId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  avatar: string | null;
-  bio: string | null;
-  role: string;
-  hiredAt: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import { Employee, Salon, Service } from "@/interfaces";
 
 async function getEmployeeById(id: string): Promise<Employee | null> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL;
@@ -128,7 +75,7 @@ export default async function Booking({ searchParams }: { searchParams: Promise<
           </div>
           <div className="space-y-3">
             {employeeServices?.map((service) => (
-              <ServiceCard key={service.id} service={service} currency={salon?.currency ?? null} />
+              <ServiceCard key={service.id} service={service} currency={"BRL"} />
             ))}
           </div>
         </div>

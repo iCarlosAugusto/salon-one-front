@@ -4,7 +4,6 @@ import {
   BadgeCheck,
   Clock3,
   Globe2,
-  Heart,
   MapPin,
   Phone,
   Share2,
@@ -17,60 +16,7 @@ import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
-
-type Service = {
-  id: string;
-  salonId: string;
-  name: string;
-  description: string | null;
-  price: string;
-  duration: number;
-  category: string | null;
-  imageUrl: string | null;
-  isActive: boolean;
-};
-
-type Salon = {
-  id: string;
-  name: string;
-  slug: string;
-  description: string | null;
-  email: string | null;
-  phone: string | null;
-  address: string | null;
-  city: string | null;
-  state: string | null;
-  zipCode: string | null;
-  country: string | null;
-  logo: string | null;
-  coverImage: string | null;
-  website: string | null;
-  timezone: string | null;
-  currency: string | null;
-  allowOnlineBooking: boolean;
-  requireBookingApproval: boolean;
-  defaultSlotInterval: number | null;
-  maxAdvanceBookingDays: number | null;
-  minAdvanceBookingHours: number | null;
-  isActive: boolean;
-  services: Service[];
-};
-
-type Employee =   {
-  id: string;
-  salonId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  avatar: string | null;
-  bio: string | null;
-  role: string;
-  hiredAt: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
+import { Salon, Employee, Service } from "@/interfaces";
 
 const formatCurrency = (value: string | number, currency: string | null = "BRL") =>
   new Intl.NumberFormat("pt-BR", {
@@ -93,10 +39,7 @@ async function getSalon(): Promise<Salon> {
 
     const salon = (await response.json()) as Salon;
 
-    return {
-      ...salon,
-      services: salon.services ?? [],
-    };
+    return salon;
   } catch (error) {
     console.error("Falha ao carregar dados da barbearia", error);
     throw error;
@@ -118,11 +61,28 @@ async function getEmployees(): Promise<Employee[]> {
   return employees;
 }
 
-export default async function Home() {
-  const salon = await getSalon();
-  const employees = await getEmployees();
-  const activeServices = salon.services.filter((service) => service.isActive);
+async function getServicesBySalonSlug(salonSlug: string): Promise<Service[] > {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL;
+  if (!baseUrl) {
+    return [];
+  }
+  const response = await fetch(`${baseUrl}/salons/${salonSlug}/services`, {
+    next: { revalidate: 60 },
+  });
+  if (!response.ok) {
+    throw new Error(`Erro ao buscar: ${response.status}`);
+  }
+  const services = (await response.json()) as Service[];
+  return services;
+}
 
+export default async function Home() {
+  const [salon, employees, services] = await Promise.all([
+    getSalon(),
+    getEmployees(),
+    getServicesBySalonSlug("barber-top"),
+  ]);
+ 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 text-slate-900">
       <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-12 lg:px-8 lg:py-16">
@@ -194,7 +154,7 @@ export default async function Home() {
             </div>
 
             <div className="space-y-4">
-              {activeServices.map((service) => (
+              {services.map((service) => (
                 <Card key={service.id} className="overflow-hidden border-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                   <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="space-y-1">
@@ -219,7 +179,7 @@ export default async function Home() {
                   </div>
                 </Card>
               ))}
-              {activeServices.length === 0 && (
+              {services.length === 0 && (
                 <Card>
                   <CardHeader>
                     <CardTitle className="text-lg">Nenhum serviço ativo</CardTitle>
@@ -324,11 +284,6 @@ export default async function Home() {
                   <p className="flex items-center gap-2">
                     <Phone className="h-4 w-4 text-primary" /> {salon.phone ?? "Telefone não informado"}
                   </p>
-                  {salon.website && (
-                    <p className="flex items-center gap-2">
-                      <Globe2 className="h-4 w-4 text-primary" /> {salon.website}
-                    </p>
-                  )}
                 </div>
               </CardContent>
             </Card>
@@ -346,10 +301,6 @@ export default async function Home() {
                 <div className="flex items-center gap-2">
                   <Sparkles className="h-4 w-4 text-sky-500" />
                   <span>{salon.allowOnlineBooking ? "Aceitando reservas online" : "Reservas apenas presenciais"}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Clock3 className="h-4 w-4 text-amber-500" />
-                  <span>Até {salon.maxAdvanceBookingDays ?? 90} dias de antecedência</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Star className="h-4 w-4 text-amber-400" />

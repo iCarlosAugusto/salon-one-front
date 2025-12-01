@@ -2,8 +2,9 @@
 
 import { Clock3, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useBookingStore, type Service } from "@/lib/store/booking-store";
+import { useBookingStore } from "@/lib/store/booking-store";
 import { cn } from "@/lib/utils";
+import { Service } from "@/interfaces";
 
 const formatCurrency = (value: string | number, currency: string | null = "BRL") =>{
   //Format pattern: 20.00

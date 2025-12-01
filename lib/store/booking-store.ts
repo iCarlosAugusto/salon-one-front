@@ -1,34 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
+import { Employee, Service } from '@/interfaces';
 
 // Types for the booking store
-export type Service = {
-  id: string;
-  salonId: string;
-  name: string;
-  description: string | null;
-  price: string;
-  duration: number;
-  category: "featured" | "services" | "combos" | null;
-  imageUrl: string | null;
-  isActive: boolean;
-};
-
-export type Employee = {
-  id: string;
-  salonId: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  avatar: string | null;
-  bio: string | null;
-  role: string;
-  hiredAt: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
 
 export type BookingState = {
   // Selected data
