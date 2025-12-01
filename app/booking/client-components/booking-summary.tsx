@@ -4,8 +4,7 @@ import { MapPin } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useBookingStore } from "@/lib/store/booking-store";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 
 const formatCurrency = (value: number, currency: string | null = "BRL") =>
   new Intl.NumberFormat("pt-BR", {
@@ -37,15 +36,21 @@ export function BookingSummary({
   salonState,
   currency,
 }: BookingSummaryProps) {
+  const pathname = usePathname();
   const router = useRouter();
-  const { selectedServices, selectedEmployee, getTotalDuration, getTotalPrice } = useBookingStore();
+  const { selectedServices, getTotalDuration, getTotalPrice } = useBookingStore();
 
   const totalDuration = getTotalDuration();
   const totalPrice = getTotalPrice();
 
   const handleContinue = () => {
-    if (selectedServices.length > 0) {
-      router.push('/hours');
+    switch(pathname) {
+      case "/booking":
+        router.push('/hours');
+        break;
+      case "/hours":
+        router.push('/confirmation');
+        break;
     }
   };
 

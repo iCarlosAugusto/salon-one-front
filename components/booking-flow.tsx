@@ -9,7 +9,6 @@ import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbS
 function BookingFlow({ children, pathname }: { children: React.ReactNode, pathname: string }) {
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 text-slate-900">
-
             <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 pb-32 sm:px-6 lg:px-8 lg:py-12 lg:pb-12">
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex flex-col items-start gap-3">

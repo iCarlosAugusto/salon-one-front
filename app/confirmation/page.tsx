@@ -3,7 +3,6 @@ import { Card, CardContent } from '@/components/ui/card'
 import { Textarea } from '@/components/ui/textarea'
 import { CreditCard, Icon, ShoppingCart } from 'lucide-react'
 
-
 function ConfirmationPage() {
   const pathname = "/confirmation";
   return (
@@ -19,9 +18,13 @@ function ConfirmationPage() {
           </Card>
         </div>
 
-        <div>
+        <div className='space-y-2'>
           <span className="text-lg font-semibold">Adicionar observações</span>
-          <Textarea placeholder='Digite aqui suas observações' />
+          <Textarea
+            placeholder='Digite aqui suas observações'
+            maxLength={100}
+            className='resize-none'
+          />
         </div>
       </div>
     </BookingFlow>
