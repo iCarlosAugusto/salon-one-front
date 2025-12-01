@@ -56,68 +56,21 @@ type Salon = {
   services: Service[];
 };
 
-const FALLBACK_SALON: Salon = {
-  id: "7e446c70-e87c-4ed3-a288-40171faae563",
-  name: "Barbearia Top",
-  slug: "barber-top",
-  description: "Experiência premium, atmosfera aconchegante e atendimento rápido.",
-  email: "barber@barber.com.br",
-  phone: "62982399800",
-  address: "Rua 101, Goiânia",
-  city: "Goiânia",
-  state: "Goiás",
-  zipCode: "74735150",
-  country: "Brasil",
-  logo: null,
-  coverImage: null,
-  website: null,
-  timezone: "America/Sao_Paulo",
-  currency: "BRL",
-  allowOnlineBooking: true,
-  requireBookingApproval: false,
-  defaultSlotInterval: 10,
-  maxAdvanceBookingDays: 90,
-  minAdvanceBookingHours: 2,
-  isActive: true,
-  services: [
-    {
-      id: "a6a3fe2e-a201-44ff-8482-85326c972b1a",
-      salonId: "7e446c70-e87c-4ed3-a288-40171faae563",
-      name: "Barba",
-      description: "Linha bem marcada com hidratação e toalha quente.",
-      price: "20.00",
-      duration: 40,
-      category: null,
-      imageUrl: null,
-      isActive: true,
-    },
-    {
-      id: "6a41c857-45c9-4eba-a325-e3d1c39c2b28",
-      salonId: "7e446c70-e87c-4ed3-a288-40171faae563",
-      name: "Sobrancelha",
-      description: "Design natural com acabamento preciso.",
-      price: "10.00",
-      duration: 20,
-      category: null,
-      imageUrl: null,
-      isActive: true,
-    },
-  ],
-};
-
-const galleryPlaceholders = [
-  "https://images.unsplash.com/photo-1553514029-1318c9127859?auto=format&fit=crop&w=1200&q=80",
-  "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=900&q=80",
-  "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80",
-];
-
-const team = [
-  { name: "Pablo", role: "Barbeiro Sênior" },
-  { name: "Jonathan", role: "Especialista em fade" },
-  { name: "Dener", role: "Designer" },
-  { name: "Gustavo", role: "Navalha e contorno" },
-];
+type Employee =   {
+  id: string;
+  salonId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  avatar: string | null;
+  bio: string | null;
+  role: string;
+  hiredAt: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const formatCurrency = (value: string | number, currency: string | null = "BRL") =>
   new Intl.NumberFormat("pt-BR", {
@@ -128,10 +81,6 @@ const formatCurrency = (value: string | number, currency: string | null = "BRL")
 
 async function getSalon(): Promise<Salon> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL;
-
-  if (!baseUrl) {
-    return FALLBACK_SALON;
-  }
 
   try {
     const response = await fetch(`${baseUrl}/salons/barber-top`, {
@@ -145,18 +94,33 @@ async function getSalon(): Promise<Salon> {
     const salon = (await response.json()) as Salon;
 
     return {
-      ...FALLBACK_SALON,
       ...salon,
-      services: salon.services ?? FALLBACK_SALON.services,
+      services: salon.services ?? [],
     };
   } catch (error) {
     console.error("Falha ao carregar dados da barbearia", error);
-    return FALLBACK_SALON;
+    throw error;
   }
+}
+
+async function getEmployees(): Promise<Employee[]> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL;
+  if (!baseUrl) {
+    return [];
+  }
+  const response = await fetch(`${baseUrl}/salons/barber-top/employees`, {
+    next: { revalidate: 60 },
+  });
+  if (!response.ok) {
+    throw new Error(`Erro ao buscar: ${response.status}`);
+  }
+  const employees = (await response.json()) as Employee[];
+  return employees;
 }
 
 export default async function Home() {
   const salon = await getSalon();
+  const employees = await getEmployees();
   const activeServices = salon.services.filter((service) => service.isActive);
 
   return (
@@ -187,25 +151,6 @@ export default async function Home() {
                   className="h-[340px] w-full object-cover"
                   priority
                 />
-                <div className="absolute bottom-3 right-3 flex items-center gap-2 rounded-full bg-white/90 px-3 py-2 text-xs font-medium text-slate-700 shadow-sm backdrop-blur">
-                  <BadgeCheck className="h-4 w-4 text-emerald-500" /> Online e presencial
-                </div>
-              </div>
-            </div>
-
-            <div className="lg:col-span-2">
-              <div className="grid h-full grid-cols-2 grid-rows-2 gap-3">
-                {galleryPlaceholders.map((image, index) => (
-                  <div key={image} className="relative overflow-hidden rounded-2xl bg-slate-100 shadow-sm">
-                    <Image
-                      src={image}
-                      alt={`Foto ${index + 1} da barbearia`}
-                      width={700}
-                      height={500}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                ))}
               </div>
             </div>
           </div>
@@ -229,17 +174,11 @@ export default async function Home() {
                 <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-emerald-700 ring-1 ring-emerald-100">
                   <ShieldCheck className="h-4 w-4" /> Confirmação {salon.requireBookingApproval ? "com aprovação" : "automática"}
                 </span>
-                <span className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-sky-700 ring-1 ring-sky-100">
-                  <Clock3 className="h-4 w-4" /> Intervalos de {salon.defaultSlotInterval ?? 10} min
-                </span>
               </div>
             </div>
             <div className="flex flex-wrap gap-3">
               <Button variant="outline" className="gap-2">
                 <Share2 className="h-4 w-4" /> Compartilhar
-              </Button>
-              <Button variant="outline" className="gap-2">
-                <Heart className="h-4 w-4" /> Favoritar
               </Button>
               <Button className="gap-2">Agendar agora</Button>
             </div>
@@ -294,16 +233,17 @@ export default async function Home() {
               <div className="flex items-center justify-between">
                 <CardTitle className="text-xl font-semibold">Equipe</CardTitle>
               </div>
-              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                {team.map((member) => (
-                    <Link key={member.name} href={`/booking`} className="center">
+
+              <div className="flex space-x-4 overflow-x-auto">
+                {employees.map((member) => (
+                    <Link key={member.firstName} href={`/booking`} className="center">
                         <div className="flex flex-col items-center gap-2">
                             <Avatar className="h-18 w-18">
-                                <AvatarImage src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=200&q=80" alt={member.name} />
-                                <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
+                                <AvatarImage src={member.avatar ?? ""} alt={member.firstName} />
+                                <AvatarFallback>{member.firstName.charAt(0)}</AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col items-center gap-1">
-                                <span className="text-sm font-semibold text-slate-800">{member.name}</span>
+                                <span className="text-sm font-semibold text-slate-800">{member.firstName}</span>
                                 <span className="text-xs text-slate-500">{member.role}</span>
                             </div>
                         </div>
@@ -375,17 +315,6 @@ export default async function Home() {
               <CardContent className="space-y-4 p-6">
                 <div className="flex items-center gap-2 text-sm font-semibold text-slate-800">
                   <BadgeCheck className="h-4 w-4 text-emerald-500" /> Agende em segundos
-                </div>
-                <div className="rounded-2xl bg-slate-50 p-4 text-sm text-slate-600">
-                  <p className="font-semibold text-slate-800">Horários disponíveis</p>
-                  <p>Próximas janelas com intervalos de {salon.defaultSlotInterval ?? 10} min.</p>
-                  <div className="mt-3 flex flex-wrap gap-2 text-xs font-medium text-slate-700">
-                    {"09:00, 09:30, 10:00, 10:30, 11:00, 11:30".split(", ").map((slot) => (
-                      <span key={slot} className="rounded-full bg-white px-3 py-1 ring-1 ring-slate-200">
-                        {slot}
-                      </span>
-                    ))}
-                  </div>
                 </div>
                 <Button className="w-full">Reservar horário</Button>
                 <div className="space-y-2 text-sm text-slate-600">

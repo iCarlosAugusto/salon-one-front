@@ -1,4 +1,4 @@
-import { BadgeCheck, Check, Clock3, MapPin, ShieldCheck, Star } from "lucide-react";
+import { BadgeCheck, Clock3, MapPin, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -45,119 +45,21 @@ type Salon = {
   services: Service[];
 };
 
-type Employee = {
-  name: string;
+type Employee =   {
+  id: string;
+  salonId: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  avatar: string | null;
+  bio: string | null;
   role: string;
-  slug: string;
-  rating: number;
-  reviews: number;
-  cover: string;
-  profileUrl: string;
-};
-
-const FALLBACK_SALON: Salon = {
-  id: "7e446c70-e87c-4ed3-a288-40171faae563",
-  name: "Barbearia Top",
-  slug: "barber-top",
-  description: "Experiência premium, ambiente aconchegante e profissionais especialistas.",
-  email: "barber@barber.com.br",
-  phone: "62982399800",
-  address: "Rua 101, Goiânia",
-  city: "Goiânia",
-  state: "Goiás",
-  zipCode: "74735150",
-  country: "Brasil",
-  logo: null,
-  coverImage:
-    "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1600&q=80",
-  website: null,
-  timezone: "America/Sao_Paulo",
-  currency: "BRL",
-  allowOnlineBooking: true,
-  requireBookingApproval: false,
-  defaultSlotInterval: 10,
-  maxAdvanceBookingDays: 90,
-  minAdvanceBookingHours: 2,
-  isActive: true,
-  services: [
-    {
-      id: "corte-cabelo",
-      salonId: "7e446c70-e87c-4ed3-a288-40171faae563",
-      name: "Corte de cabelo",
-      description: "Começamos com um lavado e tratamento aromático. Finalização com styling personalizado.",
-      price: "80.00",
-      duration: 60,
-      category: "featured",
-      imageUrl: null,
-      isActive: true,
-    },
-    {
-      id: "perfilado-cejas",
-      salonId: "7e446c70-e87c-4ed3-a288-40171faae563",
-      name: "Perfilado de sobrancelhas",
-      description: "Design preciso e natural com finalização em balm refrescante.",
-      price: "40.00",
-      duration: 20,
-      category: "featured",
-      imageUrl: null,
-      isActive: true,
-    },
-    {
-      id: "assessoramento",
-      salonId: "7e446c70-e87c-4ed3-a288-40171faae563",
-      name: "Assessoria e corte de cabelo",
-      description: "Consultoria completa para adaptar o corte ao seu estilo e rotina.",
-      price: "120.00",
-      duration: 90,
-      category: "services",
-      imageUrl: null,
-      isActive: true,
-    },
-    {
-      id: "barbaterapia",
-      salonId: "7e446c70-e87c-4ed3-a288-40171faae563",
-      name: "Barboterapia e corte de cabelo",
-      description: "Vapor quente, toalha e hidratação para barba + corte completo.",
-      price: "95.00",
-      duration: 90,
-      category: "services",
-      imageUrl: null,
-      isActive: true,
-    },
-    {
-      id: "combo-classic",
-      salonId: "7e446c70-e87c-4ed3-a288-40171faae563",
-      name: "Combo clássico",
-      description: "Corte + barba + sobrancelha com relaxamento facial.",
-      price: "150.00",
-      duration: 120,
-      category: "combos",
-      imageUrl: null,
-      isActive: true,
-    },
-  ],
-};
-
-const employees: Employee[] = [
-  {
-    name: "Jhonathan",
-    role: "Gângster",
-    slug: "jhonathan",
-    rating: 4.9,
-    reviews: 128,
-    cover: "https://images.unsplash.com/photo-1552374196-1ab2a1c593e8?auto=format&fit=crop&w=800&q=80",
-    profileUrl: "/employees/jhonathan",
-  },
-  {
-    name: "Pablo",
-    role: "Barbeiro Sênior",
-    slug: "pablo",
-    rating: 4.8,
-    reviews: 96,
-    cover: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=800&q=80",
-    profileUrl: "/employees/pablo",
-  },
-];
+  hiredAt: string;
+  isActive: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
 
 const formatCurrency = (value: string | number, currency: string | null = "BRL") =>
   new Intl.NumberFormat("pt-BR", {
@@ -174,12 +76,8 @@ const formatDuration = (minutes: number) => {
   return `${hours} h ${remaining} min`;
 };
 
-async function getSalon(): Promise<Salon> {
+async function getSalon(): Promise<Salon | null> {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL;
-
-  if (!baseUrl) {
-    return FALLBACK_SALON;
-  }
 
   try {
     const response = await fetch(`${baseUrl}/salons/barber-top`, {
@@ -193,17 +91,64 @@ async function getSalon(): Promise<Salon> {
     const salon = (await response.json()) as Salon;
 
     return {
-      ...FALLBACK_SALON,
       ...salon,
-      services: (salon.services?.length ? salon.services : FALLBACK_SALON.services).map((service) => ({
+      services: salon.services.map((service) => ({
         ...service,
         category: service.category as Service["category"],
       })),
     };
   } catch (error) {
     console.error("Falha ao carregar dados da barbearia", error);
-    return FALLBACK_SALON;
+    return null;
   }
+}
+
+async function getEmployeeById(id: string): Promise<Employee | null> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL;
+  if (!baseUrl) {
+    return null;
+  }
+  const response = await fetch(`${baseUrl}/employees/${id}`, {
+    next: { revalidate: 60 },
+  });
+  if (!response.ok) {
+    console.error("Falha ao carregar dados do funcionário", response.status);
+    return null;
+  }
+  const employee = (await response.json()) as Employee;
+  return employee;
+}
+
+async function getSalonById(id: string): Promise<Salon | null> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL;
+  if (!baseUrl) {
+    return null;
+  }
+  const response = await fetch(`${baseUrl}/salons/${id}`, {
+    next: { revalidate: 60 },
+  });
+  if (!response.ok) {
+    console.error("Falha ao carregar dados da barbearia", response.status);
+    return null;
+  }
+  const salon = (await response.json()) as Salon;
+  return salon; 
+}
+
+async function getEmployeeServices(id: string): Promise<Service[] | null> {
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL;
+  if (!baseUrl) {
+    return [];
+  }
+  const response = await fetch(`${baseUrl}/employees/${id}/services`, {
+    next: { revalidate: 60 },
+  });
+  if (!response.ok) {
+    console.error("Falha ao carregar dados dos serviços do funcionário", response.status);
+    return [];
+  }
+  const services = (await response.json()) as Service[];
+  return services;
 }
 
 function ServiceCard({ service, currency }: { service: Service; currency: string | null }) {
@@ -230,12 +175,11 @@ function ServiceCard({ service, currency }: { service: Service; currency: string
 }
 
 export default async function Booking() {
-  const salon = await getSalon();
-  const activeServices = salon.services.filter((service) => service.isActive);
-
-  const featured = activeServices.filter((service) => service.category === "featured");
-  const services = activeServices.filter((service) => service.category === "services");
-  const combos = activeServices.filter((service) => service.category === "combos");
+  const [salon, employee, employeeServices] = await Promise.all([
+    getSalonById("742e6600-9175-4524-aa15-1d9b39dcb282"),
+    getEmployeeById("742e6600-9175-4524-aa15-1d9b39dcb282"),
+    getEmployeeServices("742e6600-9175-4524-aa15-1d9b39dcb282"),
+  ]);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 text-slate-900">
@@ -262,60 +206,22 @@ export default async function Booking() {
           <div className="flex flex-1 flex-col gap-6">
             <div className="flex items-center gap-2">
               <Avatar className="h-14 w-14">
-                <AvatarImage src={employees[0].cover} alt={employees[0].name} />
-                <AvatarFallback>{employees[0].name.charAt(0)}</AvatarFallback>
+                <AvatarImage src={employee?.avatar ?? ""} alt={employee?.firstName ?? ""} />
+                <AvatarFallback>{employee?.firstName?.charAt(0) ?? ""}</AvatarFallback>
               </Avatar>
               <div className="flex flex-col gap-1">
-                <span className="text-sm font-semibold text-slate-900">{employees[0].name}</span>
-                <span className="text-xs text-slate-500">{employees[0].role}</span>
+                <span className="text-sm font-semibold text-slate-900">{employee?.firstName ?? ""}</span>
+                <span className="text-xs text-slate-500">{employee?.role ?? ""}</span>
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-2 rounded-full bg-slate-100 p-1 text-sm font-semibold text-slate-600">
-              <a className="rounded-full bg-white px-4 py-2 shadow-sm ring-1 ring-slate-200" href="#em-destaque">
-                Em destaque
-              </a>
-              <a className="rounded-full px-4 py-2" href="#servicos">
-                Serviços
-              </a>
-              <a className="rounded-full px-4 py-2" href="#combos">
-                Combos
-              </a>
-            </div>
-
-            <div className="space-y-6" id="em-destaque">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Em destaque</h2>
-              </div>
-              <div className="space-y-3">
-                {featured.map((service) => (
-                  <ServiceCard key={service.id} service={service} currency={salon.currency} />
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-6" id="servicos">
+            <div className="space-y-6" id="services">
               <div className="flex items-center justify-between">
                 <h2 className="text-lg font-semibold">Serviços</h2>
-                <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">
-                  Online {salon.allowOnlineBooking ? "ativo" : "pausado"}
-                </span>
               </div>
               <div className="space-y-3">
-                {services.map((service) => (
-                  <ServiceCard key={service.id} service={service} currency={salon.currency} />
-                ))}
-              </div>
-            </div>
-
-            <div className="space-y-6" id="combos">
-              <div className="flex items-center justify-between">
-                <h2 className="text-lg font-semibold">Combos</h2>
-                <span className="text-sm text-slate-500">Pacotes especiais com duração estendida.</span>
-              </div>
-              <div className="space-y-3">
-                {combos.map((service) => (
-                  <ServiceCard key={service.id} service={service} currency={salon.currency} />
+                {employeeServices?.map((service) => (
+                  <ServiceCard key={service.id} service={service} currency={salon?.currency ?? null} />
                 ))}
               </div>
             </div>
@@ -323,51 +229,41 @@ export default async function Booking() {
 
           <aside className="w-full max-w-xl space-y-4 self-start lg:w-80 hidden lg:block">
             <Card className="overflow-hidden border-slate-200 shadow-[0_18px_60px_-28px_rgba(15,23,42,0.32)]">
-              <CardHeader className="space-y-1 bg-gradient-to-r from-indigo-50 to-slate-50">
-                <p className="text-xs font-semibold uppercase tracking-[0.28em] text-slate-500">Resumo</p>
+              <CardHeader className="space-y-1">
                 <CardTitle className="flex items-start justify-between text-lg">
                   <span className="flex flex-1 flex-col text-slate-900">
-                    {employees[0].name}
-                    <span className="text-sm font-normal text-slate-500">{salon.name}</span>
+                    {employee?.firstName ?? ""}
+                    <span className="text-sm font-normal text-slate-500">{salon?.name ?? ""}</span>
                   </span>
-                  <span className="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">Online</span>
                 </CardTitle>
                 <CardDescription className="flex items-center gap-2 text-sm text-slate-600">
-                  <MapPin className="h-4 w-4" /> {salon.city ?? "Cidade"} · {salon.state ?? "Estado"}
+                  <MapPin className="h-4 w-4" /> {salon?.city ?? "Cidade"} · {salon?.state ?? "Estado"}
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-4 p-6 text-sm text-slate-700">
                 <div className="space-y-3">
-                  {featured.slice(0, 1).map((service) => (
+                  {employeeServices?.slice(0, 1).map((service) => (
                     <div key={service.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3">
                       <div className="space-y-0.5">
                         <p className="text-sm font-semibold text-slate-900">{service.name}</p>
                         <p className="text-xs text-slate-500">{formatDuration(service.duration)}</p>
                       </div>
-                      <p className="text-sm font-semibold text-slate-900">{formatCurrency(service.price, salon.currency)}</p>
+                      <p className="text-sm font-semibold text-slate-900">{formatCurrency(service.price, salon?.currency ?? null)}</p>
                     </div>
                   ))}
                 </div>
 
                 <div className="space-y-2 rounded-2xl bg-slate-50 p-3">
                   <div className="flex items-center justify-between text-sm text-slate-600">
-                    <span>Subtotal</span>
-                    <span className="font-semibold text-slate-900">{formatCurrency(80, salon.currency)}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-sm text-slate-600">
-                    <span>Taxas</span>
-                    <span className="font-semibold text-slate-900">{formatCurrency(0, salon.currency)}</span>
-                  </div>
-                  <div className="flex items-center justify-between text-base font-semibold text-slate-900">
                     <span>Total</span>
-                    <span>{formatCurrency(80, salon.currency)}</span>
+                    <span className="font-semibold text-slate-900">{formatCurrency(80, salon?.currency ?? null)}</span>
                   </div>
                 </div>
 
                 <div className="space-y-2 rounded-2xl bg-indigo-50 p-4 text-indigo-900">
                   <p className="text-sm font-semibold">Políticas rápidas</p>
                   <ul className="list-disc space-y-1 pl-4 text-xs text-indigo-800">
-                    <li>Cancelamento sem custo até {salon.minAdvanceBookingHours ?? 2}h antes.</li>
+                    <li>Cancelamento sem custo até {salon?.minAdvanceBookingHours ?? 2}h antes.</li>
                     <li>Pagamento no local ou confirmação online segura.</li>
                     <li>Horários atualizados em tempo real.</li>
                   </ul>
@@ -387,11 +283,11 @@ export default async function Booking() {
               <CardContent className="space-y-3 text-sm text-slate-600">
                 <div className="flex items-center gap-2">
                   <ShieldCheck className="h-4 w-4 text-emerald-500" />
-                  <span>{salon.allowOnlineBooking ? "Reservas online ativadas" : "Apenas agendamento no local"}</span>
+                  <span>{salon?.allowOnlineBooking ? "Reservas online ativadas" : "Apenas agendamento no local"}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Clock3 className="h-4 w-4 text-indigo-500" />
-                  <span>Intervalos de {salon.defaultSlotInterval ?? 10} minutos</span>
+                  <span>Intervalos de {salon?.defaultSlotInterval ?? 0} minutos</span>
                 </div>
                 <div className="flex items-start gap-2">
                   <BadgeCheck className="h-4 w-4 text-amber-500" />
