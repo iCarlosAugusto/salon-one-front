@@ -13,7 +13,7 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from "@/components/ui/breadcrumb";
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { cn } from "@/lib/utils";
 
 type Employee = {
@@ -115,6 +115,85 @@ const formatDuration = (minutes: number) => {
   return `${hours} h e ${remaining} min`;
 };
 
+// Generate days for the calendar grid
+const generateCalendarDays = (currentDate: Date) => {
+  const year = currentDate.getFullYear();
+  const month = currentDate.getMonth();
+  
+  // First day of the month
+  const firstDay = new Date(year, month, 1);
+  const lastDay = new Date(year, month + 1, 0);
+  
+  // Days in month
+  const daysInMonth = lastDay.getDate();
+  
+  // Day of week for first day (0 = Sunday)
+  const firstDayOfWeek = firstDay.getDay();
+  
+  // Calculate days from previous month to show
+  const prevMonthLastDay = new Date(year, month, 0).getDate();
+  const prevMonthDays = firstDayOfWeek;
+  
+  // Calculate days from next month to show
+  const totalCells = Math.ceil((daysInMonth + firstDayOfWeek) / 7) * 7;
+  const nextMonthDays = totalCells - (daysInMonth + firstDayOfWeek);
+  
+  const days: Array<{
+    date: number;
+    fullDate: Date;
+    isCurrentMonth: boolean;
+    isToday: boolean;
+    isAvailable: boolean;
+  }> = [];
+  
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  
+  // Previous month days
+  for (let i = prevMonthDays - 1; i >= 0; i--) {
+    const day = prevMonthLastDay - i;
+    const date = new Date(year, month - 1, day);
+    days.push({
+      date: day,
+      fullDate: date,
+      isCurrentMonth: false,
+      isToday: false,
+      isAvailable: false,
+    });
+  }
+  
+  // Current month days
+  for (let i = 1; i <= daysInMonth; i++) {
+    const date = new Date(year, month, i);
+    const isToday = date.getTime() === today.getTime();
+    const isPast = date < today;
+    // Random availability for demo (you can replace with actual logic)
+    const isAvailable = !isPast && Math.random() > 0.3;
+    
+    days.push({
+      date: i,
+      fullDate: date,
+      isCurrentMonth: true,
+      isToday,
+      isAvailable,
+    });
+  }
+  
+  // Next month days
+  for (let i = 1; i <= nextMonthDays; i++) {
+    const date = new Date(year, month + 1, i);
+    days.push({
+      date: i,
+      fullDate: date,
+      isCurrentMonth: false,
+      isToday: false,
+      isAvailable: false,
+    });
+  }
+  
+  return days;
+};
+
 // Generate days for the current month view
 const generateDays = (currentDate: Date): DaySlot[] => {
   const days: DaySlot[] = [];
@@ -151,11 +230,13 @@ const generateTimeSlots = (): TimeSlot[] => {
 export default function HoursPage() {
   const [selectedEmployee, setSelectedEmployee] = useState<Employee>(EMPLOYEES[0]);
   const [currentDate, setCurrentDate] = useState(new Date(2025, 11, 1)); // December 2025
-  const [selectedDay, setSelectedDay] = useState<number>(6);
+  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
   const [isEmployeeDropdownOpen, setIsEmployeeDropdownOpen] = useState(false);
+  const [isCalendarOpen, setIsCalendarOpen] = useState(true);
+  const [animationDirection, setAnimationDirection] = useState<'left' | 'right'>('right');
 
-  const days = generateDays(currentDate);
+  const calendarDays = useMemo(() => generateCalendarDays(currentDate), [currentDate]);
   const timeSlots = generateTimeSlots();
   
   const totalDuration = SELECTED_SERVICES.reduce((sum, service) => sum + service.duration, 0);
@@ -165,6 +246,29 @@ export default function HoursPage() {
     month: "long", 
     year: "numeric" 
   });
+
+  const weekDays = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
+
+  const handlePrevMonth = () => {
+    setAnimationDirection('left');
+    const newDate = new Date(currentDate);
+    newDate.setMonth(currentDate.getMonth() - 1);
+    setCurrentDate(newDate);
+  };
+
+  const handleNextMonth = () => {
+    setAnimationDirection('right');
+    const newDate = new Date(currentDate);
+    newDate.setMonth(currentDate.getMonth() + 1);
+    setCurrentDate(newDate);
+  };
+
+  const handleDateSelect = (day: typeof calendarDays[0]) => {
+    if (day.isAvailable && day.isCurrentMonth) {
+      setSelectedDate(day.fullDate);
+      setSelectedTime(null); // Reset time when date changes
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100">
@@ -248,17 +352,13 @@ export default function HoursPage() {
 
             {/* Month Navigation */}
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-semibold text-slate-900">{monthYear}</h2>
+              <h2 className="text-base font-semibold capitalize text-slate-900">{monthYear}</h2>
               <div className="flex items-center gap-2">
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
-                  onClick={() => {
-                    const newDate = new Date(currentDate);
-                    newDate.setMonth(currentDate.getMonth() - 1);
-                    setCurrentDate(newDate);
-                  }}
+                  className="h-8 w-8 rounded-full hover:bg-slate-100"
+                  onClick={handlePrevMonth}
                 >
                   <ChevronLeft className="h-4 w-4" />
                   <span className="sr-only">Mês anterior</span>
@@ -266,12 +366,8 @@ export default function HoursPage() {
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-8 w-8"
-                  onClick={() => {
-                    const newDate = new Date(currentDate);
-                    newDate.setMonth(currentDate.getMonth() + 1);
-                    setCurrentDate(newDate);
-                  }}
+                  className="h-8 w-8 rounded-full hover:bg-slate-100"
+                  onClick={handleNextMonth}
                 >
                   <ChevronRight className="h-4 w-4" />
                   <span className="sr-only">Próximo mês</span>
@@ -279,48 +375,140 @@ export default function HoursPage() {
               </div>
             </div>
 
-            {/* Day Selector */}
-            <div className="flex gap-3 overflow-x-auto pb-2">
-              {days.map((day) => (
-                <button
-                  key={day.date}
-                  onClick={() => day.available && setSelectedDay(day.date)}
-                  disabled={!day.available}
+            {/* Inline Calendar */}
+            <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+              <div className="p-4 sm:p-6">
+                {/* Week days header */}
+                <div className="mb-3 grid grid-cols-7 gap-2">
+                  {weekDays.map((day) => (
+                    <div
+                      key={day}
+                      className="text-center text-xs font-semibold uppercase tracking-wider text-slate-500"
+                    >
+                      {day}
+                    </div>
+                  ))}
+                </div>
+
+                {/* Calendar grid with animation */}
+                <div 
+                  key={currentDate.getMonth()}
                   className={cn(
-                    "flex min-w-[72px] flex-col items-center gap-2 rounded-full px-6 py-4 transition-all",
-                    selectedDay === day.date
-                      ? "bg-indigo-600 text-white shadow-lg shadow-indigo-600/30"
-                      : day.available
-                      ? "border border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50"
-                      : "border border-slate-100 bg-slate-50 text-slate-300 cursor-not-allowed"
+                    "grid grid-cols-7 gap-2 animate-in fade-in",
+                    animationDirection === 'right' ? "slide-in-from-right-5" : "slide-in-from-left-5"
                   )}
+                  style={{ animationDuration: '300ms' }}
                 >
-                  <span className="text-2xl font-semibold">{day.date}</span>
-                  <span className="text-xs font-medium">{day.dayName}</span>
-                </button>
-              ))}
+                  {calendarDays.map((day, index) => {
+                    const isSelected = selectedDate?.getTime() === day.fullDate.getTime();
+                    
+                    return (
+                      <button
+                        key={`${day.fullDate.getTime()}-${index}`}
+                        onClick={() => handleDateSelect(day)}
+                        disabled={!day.isAvailable || !day.isCurrentMonth}
+                        className={cn(
+                          "group relative aspect-square rounded-xl text-sm font-medium transition-all duration-200",
+                          "flex items-center justify-center",
+                          // Current month styles
+                          day.isCurrentMonth && "text-slate-900",
+                          // Other month styles
+                          !day.isCurrentMonth && "text-slate-300",
+                          // Today styles
+                          day.isToday && !isSelected && "bg-slate-100 font-semibold ring-2 ring-slate-200",
+                          // Available styles
+                          day.isAvailable && day.isCurrentMonth && !isSelected && 
+                            "hover:bg-indigo-50 hover:scale-110 hover:shadow-md hover:ring-2 hover:ring-indigo-100 cursor-pointer active:scale-95",
+                          // Selected styles
+                          isSelected && 
+                            "bg-indigo-600 text-white shadow-lg shadow-indigo-600/40 scale-110 ring-2 ring-indigo-400",
+                          // Unavailable styles
+                          (!day.isAvailable || !day.isCurrentMonth) && 
+                            "cursor-not-allowed opacity-40",
+                        )}
+                      >
+                        <span className="relative z-10 transition-transform group-hover:scale-110">{day.date}</span>
+                        
+                        {/* Today indicator dot */}
+                        {day.isToday && !isSelected && (
+                          <span className="absolute bottom-1.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-indigo-600 animate-pulse" />
+                        )}
+                        
+                        {/* Available indicator for current month days */}
+                        {day.isAvailable && day.isCurrentMonth && !isSelected && !day.isToday && (
+                          <span className="absolute inset-0 rounded-xl ring-1 ring-inset ring-slate-200 group-hover:ring-indigo-200 transition-all" />
+                        )}
+                        
+                        {/* Ripple effect on hover */}
+                        {day.isAvailable && day.isCurrentMonth && !isSelected && (
+                          <span className="absolute inset-0 rounded-xl bg-indigo-600/0 group-hover:bg-indigo-600/5 transition-colors" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
 
-            {/* Time Slots */}
-            <div className="space-y-3">
-              {timeSlots.map((slot) => (
-                <button
-                  key={slot.time}
-                  onClick={() => slot.available && setSelectedTime(slot.time)}
-                  disabled={!slot.available}
-                  className={cn(
-                    "w-full rounded-2xl border-2 px-6 py-4 text-left text-base font-medium transition-all",
-                    selectedTime === slot.time
-                      ? "border-indigo-600 bg-indigo-50 text-indigo-900"
-                      : slot.available
-                      ? "border-slate-200 bg-white text-slate-900 hover:border-slate-300 hover:bg-slate-50"
-                      : "border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed"
-                  )}
-                >
-                  {slot.time}
-                </button>
-              ))}
-            </div>
+            {/* Selected Date Display */}
+            {selectedDate && (
+              <div 
+                className="flex items-center gap-2 rounded-xl bg-indigo-50 px-4 py-3 animate-in fade-in slide-in-from-top-2"
+                style={{ animationDuration: '300ms' }}
+              >
+                <Calendar className="h-4 w-4 text-indigo-600" />
+                <span className="text-sm font-medium text-indigo-900">
+                  {selectedDate.toLocaleDateString("pt-BR", { 
+                    weekday: "long", 
+                    day: "numeric", 
+                    month: "long",
+                    year: "numeric" 
+                  })}
+                </span>
+              </div>
+            )}
+
+            {/* Time Slots - Only show when date is selected */}
+            {selectedDate && (
+              <div className="space-y-3 animate-in fade-in slide-in-from-bottom-4" style={{ animationDuration: '400ms' }}>
+                <h3 className="text-sm font-semibold text-slate-900">Horários disponíveis</h3>
+                {timeSlots.map((slot, index) => (
+                  <button
+                    key={slot.time}
+                    onClick={() => slot.available && setSelectedTime(slot.time)}
+                    disabled={!slot.available}
+                    style={{ 
+                      animationDelay: `${index * 50}ms`,
+                      animationDuration: '300ms'
+                    }}
+                    className={cn(
+                      "w-full rounded-2xl border-2 px-6 py-4 text-left text-base font-medium transition-all",
+                      "animate-in fade-in slide-in-from-left-2",
+                      selectedTime === slot.time
+                        ? "border-indigo-600 bg-indigo-50 text-indigo-900 shadow-sm"
+                        : slot.available
+                        ? "border-slate-200 bg-white text-slate-900 hover:border-indigo-200 hover:bg-indigo-50/50 hover:scale-[1.02]"
+                        : "border-slate-100 bg-slate-50 text-slate-400 cursor-not-allowed"
+                    )}
+                  >
+                    {slot.time}
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Empty state when no date selected */}
+            {!selectedDate && (
+              <div className="rounded-xl bg-slate-50 p-8 text-center animate-in fade-in">
+                <Calendar className="mx-auto mb-3 h-12 w-12 text-slate-300" />
+                <p className="text-sm font-medium text-slate-600">
+                  Selecione uma data no calendário acima
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  Escolha um dia disponível para ver os horários
+                </p>
+              </div>
+            )}
 
             {/* Waitlist Link */}
             <div className="rounded-xl bg-slate-50 p-4 text-center">
@@ -409,10 +597,15 @@ export default function HoursPage() {
 
                 {/* Continue Button */}
                 <Button 
-                  className="w-full rounded-full bg-indigo-600 py-6 text-base font-semibold hover:bg-indigo-700"
+                  className={cn(
+                    "w-full rounded-full py-6 text-base font-semibold transition-all duration-300",
+                    selectedTime 
+                      ? "bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-600/30 hover:scale-[1.02]" 
+                      : "bg-slate-300 cursor-not-allowed"
+                  )}
                   disabled={!selectedTime}
                 >
-                  Continuar
+                  {selectedTime ? "Continuar" : "Selecione data e horário"}
                 </Button>
               </CardContent>
             </Card>
@@ -433,10 +626,15 @@ export default function HoursPage() {
               </div>
             </div>
             <Button 
-              className="w-full rounded-full bg-indigo-600 py-6 text-base font-semibold hover:bg-indigo-700"
+              className={cn(
+                "w-full rounded-full py-6 text-base font-semibold transition-all duration-300",
+                selectedTime 
+                  ? "bg-indigo-600 hover:bg-indigo-700 hover:shadow-lg hover:shadow-indigo-600/30 hover:scale-[1.02]" 
+                  : "bg-slate-300 cursor-not-allowed"
+              )}
               disabled={!selectedTime}
             >
-              Continuar
+              {selectedTime ? "Continuar" : "Selecione data e horário"}
             </Button>
           </div>
         </div>
