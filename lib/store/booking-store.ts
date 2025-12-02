@@ -188,7 +188,7 @@ export const useBookingStore = create<BookingState>()(
     }),
     {
       name: 'booking-storage',
-      storage: createJSONStorage(() => localStorage),
+      storage: createJSONStorage(() => sessionStorage),
       partialize: (state) => ({
         selectedServices: state.selectedServices,
         selectedEmployee: state.selectedEmployee,

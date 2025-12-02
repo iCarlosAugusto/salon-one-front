@@ -1,0 +1,185 @@
+import React, { useState, useRef, useEffect } from "react";
+import { motion } from "framer-motion";
+import { format } from "date-fns";
+import { pt } from "date-fns/locale";
+
+interface Day {
+  date: number;
+  day: string;
+  isToday: boolean;
+  isSelected: boolean;
+  isDisabled: boolean;
+  fullDate: Date;
+}
+
+interface InlineCalendarProps {
+  initialDate?: Date;
+  daysToShow?: number;
+  onDateSelect?: (date: Date) => void;
+  isLoading?: boolean;
+}
+
+export const InlineCalendar: React.FC<InlineCalendarProps> = ({
+  initialDate = new Date(),
+  daysToShow = 30,
+  isLoading = false,
+  onDateSelect,
+}) => {
+  const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
+  const [days, setDays] = useState<Day[]>([]);
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const today = new Date();
+    const daysArray: Day[] = [];
+
+    for (let i = 0; i < daysToShow; i++) {
+      const date = new Date(today);
+      date.setDate(today.getDate() + i);
+      const dayName = format(date, 'EEE', { locale: pt });
+
+      daysArray.push({
+        date: date.getDate(),
+        day: dayName,
+        isToday: date.toDateString() === today.toDateString(),
+        isSelected: date.toDateString() === selectedDate.toDateString(),
+        isDisabled: date < today,
+        fullDate: date,
+      });
+    }
+
+    setDays(daysArray);
+  }, [selectedDate, daysToShow]);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      const selectedElement = scrollRef.current.querySelector(".selected");
+      if (selectedElement) {
+        selectedElement.scrollIntoView({
+          behavior: "smooth",
+          block: "nearest",
+          inline: "center",
+        });
+      }
+    }
+  }, [days]);
+
+  const handleDateSelect = (date: Date) => {
+    setSelectedDate(date);
+
+    if (onDateSelect) {
+      onDateSelect(date);
+    }
+  };
+
+  const scrollLeft = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: -200, behavior: "smooth" });
+    }
+  };
+
+  const scrollRight = () => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollBy({ left: 200, behavior: "smooth" });
+    }
+  };
+
+  return (
+    <div className="relative w-full max-w-md mx-auto">
+      <div className="flex flex-col">
+        <div className="flex justify-between items-center mb-2 space-x-2">
+          <span className="font-medium flex items-center">
+            {format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: pt })}
+
+            {isLoading && (
+              <div className="ml-2">
+                <div className="w-4 h-4 border-t-2 border-b-2 border-gray-900 rounded-full animate-spin"></div>
+              </div>
+            )}
+          </span>
+
+          <div className="flex space-x-2">
+            <button
+              onClick={scrollLeft}
+              className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
+              aria-label="Previous days"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M15 18L9 12L15 6"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+            <button
+              onClick={scrollRight}
+              className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
+              aria-label="Next days"
+            >
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path
+                  d="M9 6L15 12L9 18"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <div
+          ref={scrollRef}
+          className="flex overflow-x-auto scrollbar-hide py-4 px-2 space-x-3 mx-1 scroll-smooth"
+          style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+        >
+          {days.map((day) => (
+            <motion.div
+              key={day.date}
+              whileTap={{ scale: 0.95 }}
+              className={`flex flex-col items-center justify-center min-w-[60px] select-none
+                ${day.isDisabled ? "opacity-40 cursor-not-allowed" : "cursor-pointer"}
+                ${day.isSelected ? "selected" : ""}
+              `}
+              onClick={() => !day.isDisabled && !isLoading && handleDateSelect(day.fullDate)}
+            >
+              <div
+                className={`
+                  flex items-center justify-center w-12 h-12 mb-1 rounded-full
+                  ${day.isSelected ? "border-2 border-black" : ""}
+                  ${day.isSelected ? "bg-black text-white" : "bg-gray-100"}
+                `}
+              >
+                <span className="text-xl font-medium">{day.date}</span> 
+                {day.isToday && (
+                  <div className="absolute bottom-[26px] w-1 h-1 rounded-full bg-white"></div>
+                )}
+              </div>
+              <span
+                className={`text-sm ${day.isSelected ? "font-bold" : "text-gray-500"}`}
+              >
+                {day.day}
+              </span>
+            </motion.div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
