@@ -42,11 +42,10 @@ export function TimeSlotsSelector() {
 
         // Build service IDs string
         const serviceIds = selectedServices.map(s => s.id).join(',');
+        const employeeIds = selectedEmployee.id;
 
         // Build the URL with query parameters
-        const url = `${baseUrl}/appointments/available-slots?employeeId=${selectedEmployee.id}&serviceIds=${serviceIds}&date=${formattedDate}`;
-        
-        console.log('Fetching time slots:', url);
+        const url = `${baseUrl}/appointments/available-slots?employeeIds=${employeeIds}&serviceIds=${serviceIds}&date=${formattedDate}`;
 
         const response = await fetch(url, {
           cache: 'no-store',
@@ -56,8 +55,8 @@ export function TimeSlotsSelector() {
           throw new Error(`Failed to fetch time slots: ${response.status}`);
         }
 
-        const slots = await response.json() as string[];
-        setTimeSlots(slots);
+        const slots = await response.json() as {employeeId: string, availableSlots: string[], employeeName: string}[];
+        setTimeSlots(slots.flatMap(slot => slot.availableSlots));
       } catch (err) {
         console.error("Error fetching time slots:", err);
         setError(err instanceof Error ? err.message : "Failed to load time slots");
