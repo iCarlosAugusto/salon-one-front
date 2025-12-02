@@ -37,7 +37,7 @@ type ServiceCardProps = {
 export function ServiceCard({ service, currency }: ServiceCardProps) {
   const { toggleService, isServiceSelected } = useBookingStore();
   const isSelected = isServiceSelected(service.id);
-  console.log("SERVICE", service);
+
   return (
     <button
       onClick={() => toggleService(service)}

@@ -1,8 +1,6 @@
-import { BookingFlow } from '@/components/booking-flow';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { BookingFlow } from '@/components/booking-flow';    
 import { Employee } from '@/interfaces';
-import Link from 'next/link';
-import React from 'react'
+import { ProfessionalCard } from './client-components/professional-card'
 
 export default async function ProfessionalsPage({ searchParams }: { searchParams: Promise<{ serviceId?: string }> }) {
 
@@ -34,15 +32,11 @@ export default async function ProfessionalsPage({ searchParams }: { searchParams
                     <span className="text-lg font-semibold">Profissionais</span>
                     <div className="flex flex-col gap-2">
                         {professionals.map((professional) => (
-                            <Link key={professional.id} href={`/hours?employeeId=${professional.id}&serviceId=${serviceId}`}>
-                                <div className="flex items-center gap-2">
-                                    <Avatar>
-                                        <AvatarImage src={professional.avatar ?? ""} alt={professional.firstName} />
-                                        <AvatarFallback>{professional.firstName.charAt(0)}</AvatarFallback>
-                                    </Avatar>
-                                    <span className="text-sm font-medium text-slate-900">{professional.firstName}</span>
-                                </div>
-                            </Link>
+                            <ProfessionalCard
+                                key={professional.id}
+                                professional={professional}
+                                serviceId={serviceId}
+                            />
                         ))}
                     </div>
                 </div>

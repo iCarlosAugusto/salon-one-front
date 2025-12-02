@@ -1,12 +1,9 @@
 import { ArrowLeft, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { BookingTimer } from "@/components/booking-timer";
-import { BookingExpiryAlert } from "@/components/booking-expiry-alert";
-import { BookingSummary } from "../booking/client-components/booking-summary";
 import { CalendarSelector } from "./client-components/calendar-selector";
 import { TimeSlotsSelector } from "./client-components/time-slots-selector";
 import { EmployeeSelector } from "./client-components/employee-selector";
-import { MobileBottomBar } from "./client-components/mobile-bottom-bar";
 import { WaitlistLink } from "./client-components/waitlist-link";
 import { HoursProvider } from "./client-components/hours-provider";
 import { BookingFlow } from "@/components/booking-flow";
