@@ -115,9 +115,6 @@ export function CalendarSelector() {
 
   return (
     <div className="space-y-6">
-      <span>Services: {JSON.stringify(services)}</span>
-      <br/>
-      <span>Selected Employee: {JSON.stringify(selectedEmployee)}</span>
       {/* Month Navigation */}
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold capitalize text-slate-900">{monthYear}</h2>
