@@ -1,8 +1,8 @@
 import React from 'react'
 import { Button } from './ui/button'
-import { BookingSummary } from '@/app/booking/client-components/booking-summary'
+import { BookingSummary } from '@/app/[slug]/booking/client-components/booking-summary'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
-import { MobileBottomBar } from '@/app/booking/client-components/mobile-bottom-bar'
+import { MobileBottomBar } from '@/app/[slug]/booking/client-components/mobile-bottom-bar'
 import { ShieldCheck, BadgeCheck } from 'lucide-react'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from './ui/breadcrumb'
 
