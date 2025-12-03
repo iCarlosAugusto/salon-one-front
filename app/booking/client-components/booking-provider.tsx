@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useBookingStore, type Employee } from "@/lib/store/booking-store";
+import { useBookingStore, type Employee } from "@/lib/store/flow-booking-store";
 
 type BookingProviderProps = {
   employee: Employee | null;
@@ -24,4 +24,3 @@ export function BookingProvider({ employee, salonSlug }: BookingProviderProps) {
 
   return null; // This is a data-only component
 }
-

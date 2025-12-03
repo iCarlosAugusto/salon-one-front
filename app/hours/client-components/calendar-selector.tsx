@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import { Calendar, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
-import { useBookingStore } from "@/lib/store/booking-store";
+import { useBookingStore } from "@/lib/store/flow-booking-store";
 
 type CalendarDay = {
   date: number;
@@ -79,7 +79,7 @@ const generateCalendarDays = (currentDate: Date): CalendarDay[] => {
 };
 
 export function CalendarSelector() {
-  const { selectedDate: storeSelectedDate, setDate } = useBookingStore();
+  const { date: storeSelectedDate, services, setDate, selectedEmployee } = useBookingStore();
   const [currentDate, setCurrentDate] = useState(new Date(2025, 11, 1));
   const [animationDirection, setAnimationDirection] = useState<'left' | 'right'>('right');
 
@@ -115,6 +115,9 @@ export function CalendarSelector() {
 
   return (
     <div className="space-y-6">
+      <span>Services: {JSON.stringify(services)}</span>
+      <br/>
+      <span>Selected Employee: {JSON.stringify(selectedEmployee)}</span>
       {/* Month Navigation */}
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold capitalize text-slate-900">{monthYear}</h2>
@@ -226,4 +229,3 @@ export function CalendarSelector() {
     </div>
   );
 }
-

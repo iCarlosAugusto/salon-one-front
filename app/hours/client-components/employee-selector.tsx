@@ -3,19 +3,20 @@
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "lucide-react";
-import { useBookingStore } from "@/lib/store/booking-store";
+import { useBookingStore } from "@/lib/store/flow-booking-store";
 
 export function EmployeeSelector() {
-  const { selectedEmployee } = useBookingStore();
+  const { services, selectedEmployee } = useBookingStore();
+  const employee = selectedEmployee ?? services.find((service) => service.employeeSelected)?.employeeSelected ?? null;
 
   return (
     <div className="flex items-center justify-between gap-3">
       <div className="flex items-center gap-2">
         <Avatar className="h-8 w-8">
-          <AvatarImage src={selectedEmployee?.avatar ?? ""} alt={selectedEmployee?.firstName ?? ""} />
-          <AvatarFallback>{selectedEmployee?.firstName?.charAt(0) ?? ""}</AvatarFallback>
+          <AvatarImage src={employee?.avatar ?? ""} alt={employee?.firstName ?? ""} />
+          <AvatarFallback>{employee?.firstName?.charAt(0) ?? ""}</AvatarFallback>
         </Avatar>
-        <span className="text-sm font-medium text-slate-900">{selectedEmployee?.firstName ?? ""}</span>
+        <span className="text-sm font-medium text-slate-900">{employee?.firstName ?? ""}</span>
       </div>
 
       <Button 
@@ -29,4 +30,3 @@ export function EmployeeSelector() {
     </div>
   );
 }
-

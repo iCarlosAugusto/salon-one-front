@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Clock, AlertTriangle } from "lucide-react";
-import { useBookingStore } from "@/lib/store/booking-store";
+import { useBookingStore } from "@/lib/store/flow-booking-store";
 import { cn } from "@/lib/utils";
 
 type BookingTimerProps = {
@@ -74,6 +74,7 @@ export function BookingTimer({ onExpire, warningThreshold = 120 }: BookingTimerP
           : "border-slate-200 bg-slate-50"
       )}
     >
+      <span>TESTE</span>
       <div className="flex items-center justify-between gap-3">
         <div className="flex items-center gap-2">
           {showWarning ? (
@@ -121,4 +122,3 @@ export function BookingTimer({ onExpire, warningThreshold = 120 }: BookingTimerP
     </div>
   );
 }
-

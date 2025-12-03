@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Employee, Service } from "@/interfaces";
-import { useBookingStore } from "@/lib/store/booking-store";
+import { useBookingStore } from "@/lib/store/flow-booking-store";
 import { cn } from "@/lib/utils";
 import {
   Check,
@@ -25,6 +25,7 @@ import {
   UserRound,
   Users,
 } from "lucide-react";
+import { useAppointmentStore } from "@/lib/store/flow-booking-store";
 
 interface ServiceCardSelectableEmployeeProps {
     service: Service;
@@ -53,8 +54,11 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
     addEmployeeToService,
     removeEmployeeFromService,
   } = useBookingStore();
+
+  const { addService, selectedEmployee: selectedEmployeeAppointment, date, services } = useAppointmentStore();
+
   const selectedServiceEntry = useBookingStore((state) =>
-    state.selectedServices.find((s) => s.service.id === service.id)
+    state.services.find((s) => s.id === service.id)
   );
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
@@ -63,8 +67,8 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
   const isSelected = isServiceSelected(service.id);
 
   const currentEmployee = useMemo(
-    () => selectedServiceEntry?.employee ?? selectedEmployee,
-    [selectedEmployee, selectedServiceEntry?.employee]
+    () => selectedServiceEntry?.employeeSelected ?? selectedEmployee,
+    [selectedEmployee, selectedServiceEntry?.employeeSelected]
   );
 
   const fetchEmployeesByServiceId = async (serviceId: string) => {
@@ -111,14 +115,18 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
   }, [isDialogOpen, service.id]);
 
   const handleSelectEmployee = (employee: Employee | null) => {
-    if (!isSelected) {
-      toggleService(service, employee);
-    } else if (employee) {
+    if(employee) {
       addEmployeeToService(service.id, employee);
-    } else {
-      removeEmployeeFromService(service.id, currentEmployee?.id ?? "");
     }
-    setIsDialogOpen(false);
+
+    // if (!isSelected) {
+    //   toggleService(service, employee);
+    // } else if (employee) {
+    //   addEmployeeToService(service.id, employee);
+    // } else {
+    //   removeEmployeeFromService(service.id);
+    // }
+    // setIsDialogOpen(false);
   };
 
   const getEmployeeInitials = (employee: Employee) =>
@@ -126,10 +134,13 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+      <span>Date: {date?.toISOString()}</span>
+      <span>Selected Employee: {JSON.stringify(selectedEmployeeAppointment)}</span>
+      <span>Selected Service: {JSON.stringify(services[0])}</span>
       <div
         role="button"
         aria-pressed={isSelected}
-        onClick={() => toggleService(service, currentEmployee)}
+        onClick={() => addService({ ...service })}
         className={cn(
           "group w-full flex flex-col gap-3 rounded-xl border p-4 text-left transition-all",
           "hover:-translate-y-0.5 hover:shadow-md",

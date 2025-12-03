@@ -75,7 +75,7 @@ export default async function Booking({ searchParams }: { searchParams: Promise<
           </div>
           <div className="space-y-3">
             {employeeServices?.map((service) => (
-              <ServiceCard key={service.id} service={service} currency={"BRL"} />
+              <ServiceCard key={service.id} service={service} currency={"BRL"} employee={employee} />
             ))}
           </div>
         </div>

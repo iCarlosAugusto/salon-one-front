@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { useBookingStore } from "@/lib/store/booking-store";
+import { useBookingStore } from "@/lib/store/flow-booking-store";
 
 export function HoursProvider() {
   const { clearExpiredBooking } = useBookingStore();
@@ -13,4 +13,3 @@ export function HoursProvider() {
 
   return null;
 }
-

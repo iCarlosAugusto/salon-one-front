@@ -24,7 +24,7 @@ export function ServiceCard({ service, slug }: { service: Service, slug: string 
         router.push(`/${slug}/professionals?serviceId=${service.id}`);
     }
     return (
-        <Link key={service.id} href={`/${slug}/professionals?serviceId=${service.id}`} className="center">
+        <Link key={service.id} href={`/${slug}/services?serviceId=${service.id}`} className="center">
             <Card className="overflow-hidden border-slate-200 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md">
                 <div className="flex flex-col gap-4 p-4 sm:flex-row sm:items-center sm:justify-between">
                     <div className="space-y-1">

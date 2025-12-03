@@ -2,9 +2,9 @@
 
 import { Clock3, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { useBookingStore } from "@/lib/store/booking-store";
+import { useBookingStore } from "@/lib/store/flow-booking-store";
 import { cn } from "@/lib/utils";
-import { Service } from "@/interfaces";
+import { Employee, Service } from "@/interfaces";
 
 const formatCurrency = (value: string | number, currency: string | null = "BRL") =>{
   //Format pattern: 20.00
@@ -32,15 +32,28 @@ const formatDuration = (minutes: number) => {
 type ServiceCardProps = {
   service: Service;
   currency: string | null;
+  employee: Employee | null;
 };
 
-export function ServiceCard({ service, currency }: ServiceCardProps) {
-  const { toggleService, isServiceSelected } = useBookingStore();
+export function ServiceCard({ service, currency, employee }: ServiceCardProps) {
+  const { addService, removeService, addEmployeeToService, removeEmployeeFromService, isServiceSelected, services } = useBookingStore();
   const isSelected = isServiceSelected(service.id);
+
+
+  const handleSelectService = (service: Service) => {
+  
+    if(isSelected) {
+      removeService(service.id);
+      removeEmployeeFromService(service.id);
+    } else {
+      addService(service);
+      addEmployeeToService(service.id, employee!);
+    }
+  }
 
   return (
     <button
-      onClick={() => toggleService(service)}
+      onClick={() => handleSelectService(service)}
       className={cn(
         "group w-full flex gap-3 rounded-sm border p-4 shadow-[0_8px_32px_-12px_rgba(0,0,0,0.12)] transition-all text-left",
         "hover:-translate-y-0.5 hover:shadow-md",
@@ -77,4 +90,3 @@ export function ServiceCard({ service, currency }: ServiceCardProps) {
     </button>
   );
 }
-

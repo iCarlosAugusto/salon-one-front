@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { useBookingStore } from "@/lib/store/booking-store";
+import { useBookingStore } from "@/lib/store/flow-booking-store";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
@@ -23,8 +23,8 @@ const formatDuration = (minutes: number) => {
 export function MobileBottomBar() {
   const router = useRouter();
   const { 
-    selectedServices, 
-    selectedDate,
+    services, 
+    date,
     selectedTime,
     getTotalDuration, 
     getTotalPrice 
@@ -34,7 +34,7 @@ export function MobileBottomBar() {
   const totalPrice = getTotalPrice();
 
   const handleContinue = () => {
-    if (selectedDate && selectedTime) {
+    if (date && selectedTime) {
       router.push('/confirm');
     }
   };
@@ -45,10 +45,10 @@ export function MobileBottomBar() {
         <div className="flex items-center justify-between">
           <div className="flex flex-col">
             <span className="text-sm font-semibold text-slate-900">
-              {selectedServices.length === 0 ? "Nenhum serviço" : `a partir de ${formatCurrency(totalPrice)}`}
+              {services.length === 0 ? "Nenhum serviço" : `a partir de ${formatCurrency(totalPrice)}`}
             </span>
             <span className="text-xs text-slate-500">
-              {selectedServices.length} {selectedServices.length === 1 ? "serviço" : "serviços"} • {formatDuration(totalDuration)}
+              {services.length} {services.length === 1 ? "serviço" : "serviços"} • {formatDuration(totalDuration)}
             </span>
           </div>
         </div>
@@ -68,4 +68,3 @@ export function MobileBottomBar() {
     </div>
   );
 }
-

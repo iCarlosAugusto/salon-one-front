@@ -3,24 +3,27 @@
 import { useEffect, useState } from "react";
 import { Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useBookingStore } from "@/lib/store/booking-store";
+import { useBookingStore } from "@/lib/store/flow-booking-store";
 
 export function TimeSlotsSelector() {
   const { 
-    selectedDate, 
+    date, 
     selectedTime, 
     setTime, 
-    selectedServices,
-    selectedEmployee 
+    services,
   } = useBookingStore();
 
   const [timeSlots, setTimeSlots] = useState<string[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const employeeIds = services
+    .map((service) => service.employeeSelected?.id)
+    .filter(Boolean)
+    .join(",");
 
   useEffect(() => {
     // Reset slots when date changes or is cleared
-    if (!selectedDate || !selectedEmployee || selectedServices.length === 0) {
+    if (!date || services.length === 0 || !employeeIds) {
       setTimeSlots([]);
       setError(null);
       return;
@@ -37,12 +40,11 @@ export function TimeSlotsSelector() {
         }
 
         // Format date as YYYY-MM-DD
-        const date = new Date(selectedDate);
-        const formattedDate = date.toISOString().split('T')[0]; // e.g., "2025-12-01"
+        const parsedDate = new Date(date);
+        const formattedDate = parsedDate.toISOString().split('T')[0]; // e.g., "2025-12-01"
 
         // Build service IDs string
-        const serviceIds = selectedServices.map(s => s.id).join(',');
-        const employeeIds = selectedEmployee.id;
+        const serviceIds = services.map(s => s.id).join(',');
 
         // Build the URL with query parameters
         const url = `${baseUrl}/appointments/available-slots?employeeIds=${employeeIds}&serviceIds=${serviceIds}&date=${formattedDate}`;
@@ -68,14 +70,14 @@ export function TimeSlotsSelector() {
     };
 
     fetchTimeSlots();
-  }, [selectedDate, selectedEmployee, selectedServices]); // Re-fetch when any of these change
+  }, [date, employeeIds, services]); // Re-fetch when any of these change
 
   const handleTimeSelect = (time: string) => {
     setTime(time);
   };
 
   // No date selected state
-  if (!selectedDate) {
+  if (!date) {
     return (
       <div className="rounded-xl bg-slate-50 p-8 text-center animate-in fade-in">
         <Calendar className="mx-auto mb-3 h-12 w-12 text-slate-300" />
@@ -89,23 +91,8 @@ export function TimeSlotsSelector() {
     );
   }
 
-  // No employee selected state
-  if (!selectedEmployee) {
-    return (
-      <div className="rounded-xl bg-slate-50 p-8 text-center animate-in fade-in">
-        <Calendar className="mx-auto mb-3 h-12 w-12 text-slate-300" />
-        <p className="text-sm font-medium text-slate-600">
-          Nenhum profissional selecionado
-        </p>
-        <p className="mt-1 text-xs text-slate-500">
-          Volte e selecione um profissional
-        </p>
-      </div>
-    );
-  }
-
   // No services selected state
-  if (selectedServices.length === 0) {
+  if (services.length === 0) {
     return (
       <div className="rounded-xl bg-slate-50 p-8 text-center animate-in fade-in">
         <Calendar className="mx-auto mb-3 h-12 w-12 text-slate-300" />
@@ -114,6 +101,21 @@ export function TimeSlotsSelector() {
         </p>
         <p className="mt-1 text-xs text-slate-500">
           Volte e selecione pelo menos um serviço
+        </p>
+      </div>
+    );
+  }
+
+  // No employee selected state
+  if (!employeeIds) {
+    return (
+      <div className="rounded-xl bg-slate-50 p-8 text-center animate-in fade-in">
+        <Calendar className="mx-auto mb-3 h-12 w-12 text-slate-300" />
+        <p className="text-sm font-medium text-slate-600">
+          Nenhum profissional selecionado
+        </p>
+        <p className="mt-1 text-xs text-slate-500">
+          Volte e selecione um profissional para cada serviço
         </p>
       </div>
     );
@@ -204,4 +206,3 @@ export function TimeSlotsSelector() {
     </div>
   );
 }
-

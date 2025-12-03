@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { AlertCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useBookingStore } from "@/lib/store/booking-store";
+import { useBookingStore } from "@/lib/store/flow-booking-store";
 import { useRouter } from "next/navigation";
 
 export function BookingExpiryAlert() {
@@ -73,4 +73,3 @@ export function BookingExpiryAlert() {
     </div>
   );
 }
-

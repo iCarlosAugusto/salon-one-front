@@ -3,7 +3,7 @@
 import { MapPin } from "lucide-react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useBookingStore } from "@/lib/store/booking-store";
+import { useBookingStore } from "@/lib/store/flow-booking-store";
 import { useRouter, usePathname } from "next/navigation";
 
 const formatCurrency = (value: number, currency: string | null = "BRL") =>
@@ -38,7 +38,7 @@ export function BookingSummary({
 }: BookingSummaryProps) {
   const pathname = usePathname();
   const router = useRouter();
-  const { selectedServices, getTotalDuration, getTotalPrice } = useBookingStore();
+  const { services, getTotalDuration, getTotalPrice } = useBookingStore();
 
   const totalDuration = getTotalDuration();
   const totalPrice = getTotalPrice();
@@ -70,12 +70,12 @@ export function BookingSummary({
       <CardContent className="space-y-4 p-6 text-sm text-slate-700">
         {/* Selected Services */}
         <div className="space-y-3">
-          {selectedServices.length === 0 ? (
+          {services.length === 0 ? (
             <div className="rounded-xl bg-slate-50 p-6 text-center">
               <p className="text-sm text-slate-500">Nenhum serviço selecionado</p>
             </div>
           ) : (
-            selectedServices.map((service) => (
+            services.map((service) => (
               <div key={service.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3 animate-in fade-in slide-in-from-top-2">
                 <div className="space-y-0.5">
                   <p className="text-sm font-semibold text-slate-900">{service.name}</p>
@@ -90,7 +90,7 @@ export function BookingSummary({
         </div>
 
         {/* Total */}
-        {selectedServices.length > 0 && (
+        {services.length > 0 && (
           <div className="space-y-2 rounded-2xl bg-slate-50 p-3 animate-in fade-in slide-in-from-bottom-2">
             <div className="flex items-center justify-between text-sm text-slate-600">
               <span>Subtotal</span>
@@ -122,13 +122,12 @@ export function BookingSummary({
         {/* Continue Button */}
         <Button 
           onClick={handleContinue}
-          disabled={selectedServices.length === 0}
+          disabled={services.length === 0}
           className="w-full rounded-full bg-indigo-600 text-base font-semibold transition-all hover:bg-indigo-700 hover:scale-[1.02] disabled:scale-100 disabled:bg-slate-300 disabled:cursor-not-allowed"
         >
-          {selectedServices.length === 0 ? "Selecione um serviço" : "Continuar"}
+          {services.length === 0 ? "Selecione um serviço" : "Continuar"}
         </Button>
       </CardContent>
     </Card>
   );
 }
-
