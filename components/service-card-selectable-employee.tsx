@@ -134,9 +134,6 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
 
   return (
     <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-      <span>Date: {date?.toISOString()}</span>
-      <span>Selected Employee: {JSON.stringify(selectedEmployeeAppointment)}</span>
-      <span>Selected Service: {JSON.stringify(services[0])}</span>
       <div
         role="button"
         aria-pressed={isSelected}
