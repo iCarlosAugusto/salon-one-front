@@ -1,6 +1,5 @@
 import { BookingFlow } from '@/components/booking-flow'
 import { Service } from '@/interfaces';
-import { ServiceCard } from '@/components/service-card';
 import ServiceCardSelectableEmployee from '@/components/service-card-selectable-employee';
 
 export default async function ServicesPage() {

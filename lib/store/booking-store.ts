@@ -6,7 +6,7 @@ import { Employee, Service } from '@/interfaces';
 
 export type BookingState = {
   // Selected data
-  selectedServices: Service[];
+  selectedServices: {service: Service, employee: Employee | null}[];
   selectedEmployee: Employee | null;
   selectedDate: Date | null;
   selectedTime: string | null;
@@ -20,10 +20,12 @@ export type BookingState = {
   sessionDuration: number; // Duration in milliseconds (default: 15 minutes)
   
   // Actions for services
-  addService: (service: Service) => void;
+  addService: (service: Service, employee: Employee | null) => void;
+  addEmployeeToService: (serviceId: string, employee: Employee) => void;
+  removeEmployeeFromService: (serviceId: string, employeeId: string) => void;
   removeService: (serviceId: string) => void;
   clearServices: () => void;
-  toggleService: (service: Service) => void;
+  toggleService: (service: Service, employee?: Employee | null) => void;
   
   // Actions for employee
   setEmployee: (employee: Employee | null) => void;
@@ -63,35 +65,45 @@ export const useBookingStore = create<BookingState>()(
       sessionDuration: 5 * 60 * 1000, // 15 minutes in milliseconds
 
       // Service actions
-      addService: (service) => 
+      addService: (service, employee = null) => 
         set((state) => ({
-          selectedServices: [...state.selectedServices, service],
+          selectedServices: [...state.selectedServices, {service, employee}],
+        })),
+
+      addEmployeeToService: (serviceId, employee) =>
+        set((state) => ({
+          selectedServices: state.selectedServices.map(service => service.service.id === serviceId ? { ...service, employee } : service),
+      })),
+
+      removeEmployeeFromService: (serviceId, employeeId) =>
+        set((state) => ({
+          selectedServices: state.selectedServices.map(service => service.service.id === serviceId ? { ...service, employee: null } : service),
         })),
 
       removeService: (serviceId) =>
         set((state) => ({
           selectedServices: state.selectedServices.filter(
-            (service) => service.id !== serviceId
+            (service) => service.service.id !== serviceId
           ),
         })),
 
       clearServices: () => set({ selectedServices: [] }),
 
-      toggleService: (service) =>
+      toggleService: (service, employee = null) =>
         set((state) => {
           const isSelected = state.selectedServices.some(
-            (s) => s.id === service.id
+            (s) => s.service.id === service.id
           );
           
           if (isSelected) {
             return {
               selectedServices: state.selectedServices.filter(
-                (s) => s.id !== service.id
+                (s) => s.service.id !== service.id
               ),
             };
           } else {
             return {
-              selectedServices: [...state.selectedServices, service],
+              selectedServices: [...state.selectedServices, {service, employee}],
             };
           }
         }),
@@ -170,20 +182,20 @@ export const useBookingStore = create<BookingState>()(
 
       getTotalDuration: () => {
         const services = get().selectedServices;
-        return services.reduce((total, service) => total + service.duration, 0);
+        return services.reduce((total, service) => total + service.service?.duration, 0);
       },
 
       getTotalPrice: () => {
         const services = get().selectedServices;
         return services.reduce(
-          (total, service) => total + parseFloat(service.price),
+          (total, service) => total + parseFloat(service.service.price),
           0
         );
       },
 
       isServiceSelected: (serviceId) => {
         const services = get().selectedServices;
-        return services.some((service) => service.id === serviceId);
+        return services.some((service) => service.service.id === serviceId);
       },
     }),
     {
