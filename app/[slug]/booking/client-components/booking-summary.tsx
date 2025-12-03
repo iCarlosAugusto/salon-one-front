@@ -5,6 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useBookingStore } from "@/lib/store/flow-booking-store";
 import { useRouter, usePathname } from "next/navigation";
+import { useMemo, useState } from "react";
+import { useAuth } from "@/lib/hooks/use-auth";
+import { GetBasicInfoDialog } from "@/components/ui/get-basic-info-dialog";
 
 const formatCurrency = (value: number, currency: string | null = "BRL") =>
   new Intl.NumberFormat("pt-BR", {
@@ -36,6 +39,8 @@ export function BookingSummary({
   salonState,
   currency,
 }: BookingSummaryProps) {
+  const { user, isAuthenticated, isLoading: isAuthLoading, signOut } = useAuth();
+  const [showModalAuth, setShowModalAuth] = useState(false);
   const pathname = usePathname();
   const router = useRouter();
   const { services, getTotalDuration, getTotalPrice } = useBookingStore();
@@ -43,9 +48,10 @@ export function BookingSummary({
   const totalDuration = getTotalDuration();
   const totalPrice = getTotalPrice();
 
+  const route = pathname.split('/')[2];
+
   const handleContinue = () => {
-    const route = pathname.split('/')[2];
-    switch(route) {
+    switch (route) {
       case "booking":
         router.push('/hours');
         break;
@@ -56,6 +62,31 @@ export function BookingSummary({
         router.push('/confirmation');
         break;
     }
+  };
+
+  const buttonText = useMemo(() => {
+    switch (route) {
+      case "booking":
+        return "Selecione um serviço";
+      case "services":
+        return "Selecione um horário";
+      case "hours":
+        return "Confirmar agendamento";
+      case "confirmation":
+        return "Confirmar agendamento";
+    }
+  }, [route]);
+
+  const confirmBooking = () => {
+   
+  }
+
+  const handleShowModalAuth = () => {
+    if (!isAuthenticated) {
+      setShowModalAuth(true);
+      return;
+    }
+
   };
 
   return (
@@ -124,14 +155,19 @@ export function BookingSummary({
         </div>
 
         {/* Continue Button */}
-        <Button 
-          onClick={handleContinue}
+        <Button
+          onClick={route === "confirmation" ? handleShowModalAuth : handleContinue}
           disabled={services.length === 0}
           className="w-full rounded-full bg-indigo-600 text-base font-semibold transition-all hover:bg-indigo-700 hover:scale-[1.02] disabled:scale-100 disabled:bg-slate-300 disabled:cursor-not-allowed"
         >
-          {services.length === 0 ? "Selecione um serviço" : "Continuar"}
+          {buttonText}
         </Button>
       </CardContent>
+
+      <GetBasicInfoDialog
+        open={showModalAuth}
+        onOpenChange={setShowModalAuth}
+      />
     </Card>
   );
 }
