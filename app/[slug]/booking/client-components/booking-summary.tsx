@@ -8,6 +8,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useMemo, useState } from "react";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { GetBasicInfoDialog } from "@/components/ui/get-basic-info-dialog";
+import { Separator } from "@/components/ui/separator";
 
 const formatCurrency = (value: number, currency: string | null = "BRL") =>
   new Intl.NumberFormat("pt-BR", {
@@ -79,7 +80,7 @@ export function BookingSummary({
   }, [route]);
 
   const confirmBooking = () => {
-   
+
   }
 
   const handleShowModalAuth = () => {
@@ -112,15 +113,19 @@ export function BookingSummary({
             </div>
           ) : (
             services.map((service) => (
-              <div key={service.id} className="flex items-center justify-between gap-3 rounded-xl bg-slate-50 p-3 animate-in fade-in slide-in-from-top-2">
+              <>
                 <div className="space-y-0.5">
-                  <p className="text-sm font-semibold text-slate-900">{service.name}</p>
-                  <p className="text-xs text-slate-500">{formatDuration(service.duration)}</p>
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm font-semibold text-slate-900">{service.name}</span>
+                    <span className="text-sm font-semibold text-slate-900">
+                      {formatCurrency(parseFloat(service.price), currency)}
+                    </span>
+                  </div>
+
+                  <p className="text-xs text-slate-500">{formatDuration(service.duration)} com {service.employeeSelected?.firstName ?? "Qualquer profissional"}</p>
                 </div>
-                <p className="text-sm font-semibold text-slate-900">
-                  {formatCurrency(parseFloat(service.price), currency)}
-                </p>
-              </div>
+                <Separator />
+              </>
             ))
           )}
         </div>
@@ -128,12 +133,6 @@ export function BookingSummary({
         {/* Total */}
         {services.length > 0 && (
           <div className="space-y-2 rounded-2xl bg-slate-50 p-3 animate-in fade-in slide-in-from-bottom-2">
-            <div className="flex items-center justify-between text-sm text-slate-600">
-              <span>Subtotal</span>
-              <span className="font-semibold text-slate-900">
-                {formatCurrency(totalPrice, currency)}
-              </span>
-            </div>
             <div className="flex items-center justify-between text-sm text-slate-600">
               <span>Duração total</span>
               <span className="font-semibold text-slate-900">{formatDuration(totalDuration)}</span>
