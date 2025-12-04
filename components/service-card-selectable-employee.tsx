@@ -113,7 +113,9 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
     if (employee) {
       addEmployeeToService(service.id, employee);
     }
-    setIsDialogOpen(false);
+    setTimeout(() => {
+      setIsDialogOpen(false);
+    }, 150);
   };
 
   const clearEmployeeSelection = (serviceId: string) => {
@@ -174,7 +176,7 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
 
           }}
           className={cn(
-            "justify-start w-1/2 rounded-full border-slate-200 bg-white px-4 py-5 text-base font-medium text-slate-800 shadow-sm hover:bg-slate-50",
+            "justify-start  w-full md:w-1/2 rounded-full border-slate-200 bg-white px-4 py-5 text-base font-medium text-slate-800 shadow-sm hover:bg-slate-50",
             "transition-colors",
             !currentEmployee && "ring-1 ring-indigo-200"
           )}
@@ -187,7 +189,7 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
               </AvatarFallback>
             </Avatar> : <Users className="h-5 w-5" />}
           </span>
-          <span className="flex-1 text-left">
+          <span className="flex-1 text-left text-ellipsis overflow-hidden whitespace-nowrap">
             {currentEmployee ? `${currentEmployee.firstName} ${currentEmployee.lastName}` : "Qualquer profissional"}
           </span>
           <ChevronDown className="h-5 w-5 text-slate-500" />
