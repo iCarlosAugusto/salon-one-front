@@ -38,12 +38,12 @@ export const InlineCalendar: React.FC<InlineCalendarProps> = ({
       const date = new Date(today);
       date.setDate(today.getDate() + i);
       const dayName = format(date, 'EEE', { locale: pt });
-
+      console.log(selectedDate)
       daysArray.push({
         date: date.getDate(),
         day: dayName,
         isToday: date.toDateString() === today.toDateString(),
-        isSelected: selectedDate ? date.toDateString() === selectedDate.toDateString() : false,
+        isSelected: selectedDate ? date?.toDateString() === selectedDate?.toDateString() : false,
         isDisabled: date < today,
         fullDate: date,
       });

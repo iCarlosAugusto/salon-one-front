@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Drawer, DrawerContent, DrawerDescription, DrawerHeader, DrawerTitle, DrawerTrigger } from "@/components/ui/drawer";
 import { useBookingStore } from "@/lib/store/flow-booking-store";
 import { ChevronUp } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
 
@@ -30,13 +30,14 @@ type MobileBottomBarProps = {
 export function MobileBottomBar({ currency }: MobileBottomBarProps) {
   const router = useRouter();
   const { services, getTotalDuration, getTotalPrice } = useBookingStore();
-
+  const pathname = usePathname();
+  const slug = pathname.split('/')[1];
   const totalDuration = getTotalDuration();
   const totalPrice = getTotalPrice();
 
   const handleContinue = () => {
     if (services.length > 0) {
-      router.push('/hours');
+      router.push(`/${slug}/hours`);
     }
   };
 

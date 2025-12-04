@@ -4,13 +4,14 @@ import { useEffect, useState } from "react";
 import { AlertCircle, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useBookingStore } from "@/lib/store/flow-booking-store";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 
 export function BookingExpiryAlert() {
   const router = useRouter();
   const [showAlert, setShowAlert] = useState(false);
   const { selectedTime, isBookingExpired, clearExpiredBooking } = useBookingStore();
-
+  const pathname = usePathname();
+  const slug = pathname.split('/')[1];
   useEffect(() => {
     if (!selectedTime) {
       setShowAlert(false);
@@ -31,7 +32,7 @@ export function BookingExpiryAlert() {
   const handleClose = () => {
     setShowAlert(false);
     clearExpiredBooking();
-    router.push('/hours'); // Redirect back to hours selection
+    router.push(`/${slug}/hours`); // Redirect back to hours selection
   };
 
   if (!showAlert) {

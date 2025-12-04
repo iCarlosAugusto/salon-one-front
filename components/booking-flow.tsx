@@ -5,40 +5,43 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/
 import { MobileBottomBar } from '@/app/[slug]/booking/client-components/mobile-bottom-bar'
 import { ShieldCheck, BadgeCheck } from 'lucide-react'
 import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from './ui/breadcrumb'
+import Link from 'next/link'
 
-function BookingFlow({ children, pathname }: { children: React.ReactNode, pathname: string }) {
+async function BookingFlow({ children, pathname }: { children: React.ReactNode, pathname: string }) {
+    const slug = "barber-top";
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 text-slate-900">
             <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 py-8 pb-32 sm:px-6 lg:px-8 lg:py-12 lg:pb-12">
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex flex-col items-start gap-3">
                         <div className="flex items-center gap-3">
-                        
-                        <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-slate-200 bg-white">
-                            <span className="sr-only">Voltar</span>
-                            <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5">
-                                <path d="M15 6l-6 6 6 6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        </Button>
-                        <div>
-                            <h1 className="text-2xl font-semibold sm:text-3xl">Descubra e agende em poucos toques</h1>
+
+                            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-slate-200 bg-white">
+                                <span className="sr-only">Voltar</span>
+                                <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5">
+                                    <path d="M15 6l-6 6 6 6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
+                                </svg>
+                            </Button>
+                            <div>
+                                <h1 className="text-2xl font-semibold sm:text-3xl">Descubra e agende em poucos toques</h1>
+                            </div>
                         </div>
-                        </div>
-   
+
                         <Breadcrumb>
-                        <BreadcrumbList>
-                            <BreadcrumbItem>
-                            <BreadcrumbLink href={pathname === "/booking" ? "/booking" : "/services"}>Serviços</BreadcrumbLink>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator />
-                            <BreadcrumbItem>
-                            <BreadcrumbLink href={pathname === "/hours" ? "/hours" : "/booking"}>Agendamento</BreadcrumbLink>
-                            </BreadcrumbItem>
-                            <BreadcrumbSeparator />
-                            <BreadcrumbItem>
-                            <BreadcrumbPage>{pathname === "/hours" ? "Horário" : "Confirmar"}</BreadcrumbPage>
-                            </BreadcrumbItem>
-                        </BreadcrumbList>
+                            <BreadcrumbList>
+                                <BreadcrumbItem>
+                                    <Link href={`/${slug}/services`}>Serviços</Link>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator />
+                                <BreadcrumbItem>
+                                    <Link href={`/${slug}/hours`}>Horários</Link>
+                                </BreadcrumbItem>
+                                <BreadcrumbSeparator />
+                                <BreadcrumbItem>
+                                    <Link href={`/${slug}/confirmation`}>Confirmar</Link>
+                                </BreadcrumbItem>
+                            </BreadcrumbList>
                         </Breadcrumb>
                     </div>
                     <Button variant="outline" className="hidden rounded-full border-slate-200 text-sm font-semibold text-slate-700 shadow-sm hover:border-slate-300 sm:inline-flex">

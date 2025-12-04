@@ -1,13 +1,14 @@
 "use client";
 import { Employee } from '@/interfaces'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useRouter } from 'next/navigation'
+import { usePathname, useRouter } from 'next/navigation'
 
 export function ProfessionalCard({ professional, serviceId }: { professional: Employee, serviceId: string }) {
     const router = useRouter();
-
+    const pathname = usePathname();
+    const slug = pathname.split('/')[1];
     const handleSelectProfessional = () => {
-        router.push(`/hours?employeeId=${professional.id}&serviceId=${serviceId}`);
+        router.push(`/${slug}/hours?employeeId=${professional.id}&serviceId=${serviceId}`);
     }
     return (
         <div onClick={handleSelectProfessional}>

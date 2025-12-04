@@ -5,14 +5,14 @@ import { HoursProvider } from "./client-components/hours-provider";
 import { BookingFlow } from "@/components/booking-flow";
 
 export default async function HoursPage() {
-  const pathname = "/hours";
+  const pathname = "/[slug]/hours";
   return (
     <BookingFlow pathname={pathname}>
       {/* Client-side providers and alerts */}
       <HoursProvider />
       <>
         {/* Mobile Header */}
-        <div className="mb-6lg:hidden">
+        <div className="mb-6 lg:hidden">
           <h1 className="text-xl font-semibold text-slate-900">Selecionar horário</h1>
         </div>
 

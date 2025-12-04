@@ -49,17 +49,18 @@ export function BookingSummary({
   const totalPrice = getTotalPrice();
 
   const route = pathname.split('/')[2];
+  const slug = pathname.split('/')[1];
 
   const handleContinue = () => {
     switch (route) {
       case "booking":
-        router.push('/hours');
+        router.push(`/${slug}/hours`);
         break;
       case "services":
-        router.push('/hours');
+        router.push(`/${slug}/hours`);
         break;
       case "hours":
-        router.push('/confirmation');
+        router.push(`/${slug}/confirmation`);
         break;
     }
   };
