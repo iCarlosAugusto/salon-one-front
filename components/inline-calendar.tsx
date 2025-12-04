@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
 import { format } from "date-fns";
 import { pt } from "date-fns/locale";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
 interface Day {
   date: number;
@@ -13,7 +14,7 @@ interface Day {
 }
 
 interface InlineCalendarProps {
-  initialDate?: Date;
+  initialDate?: Date | null;
   daysToShow?: number;
   onDateSelect?: (date: Date) => void;
   isLoading?: boolean;
@@ -25,7 +26,7 @@ export const InlineCalendar: React.FC<InlineCalendarProps> = ({
   isLoading = false,
   onDateSelect,
 }) => {
-  const [selectedDate, setSelectedDate] = useState<Date>(initialDate);
+  const [selectedDate, setSelectedDate] = useState<Date>(initialDate ?? new Date());
   const [days, setDays] = useState<Day[]>([]);
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -72,6 +73,10 @@ export const InlineCalendar: React.FC<InlineCalendarProps> = ({
     }
   };
 
+  const handleTodaySelect = () => {
+    setSelectedDate(new Date());
+  };
+
   const scrollLeft = () => {
     if (scrollRef.current) {
       scrollRef.current.scrollBy({ left: -200, behavior: "smooth" });
@@ -85,12 +90,11 @@ export const InlineCalendar: React.FC<InlineCalendarProps> = ({
   };
 
   return (
-    <div className="relative w-full max-w-md mx-auto">
+    <div className="relative w-full max-w-2xl mx-auto">
       <div className="flex flex-col">
         <div className="flex justify-between items-center mb-2 space-x-2">
-          <span className="font-medium flex items-center">
+          <span className="font-semibold flex items-center">
             {format(selectedDate, "EEEE, d 'de' MMMM 'de' yyyy", { locale: pt })}
-
             {isLoading && (
               <div className="ml-2">
                 <div className="w-4 h-4 border-t-2 border-b-2 border-gray-900 rounded-full animate-spin"></div>
@@ -98,49 +102,26 @@ export const InlineCalendar: React.FC<InlineCalendarProps> = ({
             )}
           </span>
 
-          <div className="flex space-x-2">
-            <button
-              onClick={scrollLeft}
-              className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
-              aria-label="Previous days"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+          <div className="flex items-center space-x-2">
+            <div className="border-2 border-gray-200 rounded-full cursor-pointer p-2 px-5" onClick={handleTodaySelect}>
+              <span className="text-sm font-medium">Hoje</span>
+            </div>
+            <div>
+              <button
+                onClick={scrollLeft}
+                className="p-2 rounded-full cursor-pointer hover:bg-gray-100 focus:outline-none"
+                aria-label="Previous days"
               >
-                <path
-                  d="M15 18L9 12L15 6"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
-            <button
-              onClick={scrollRight}
-              className="p-2 rounded-full hover:bg-gray-100 focus:outline-none"
-              aria-label="Next days"
-            >
-              <svg
-                width="16"
-                height="16"
-                viewBox="0 0 24 24"
-                fill="none"
-                xmlns="http://www.w3.org/2000/svg"
+                <ChevronLeft className="h-5 w-5" />
+              </button>
+              <button
+                onClick={scrollRight}
+                className="p-2 rounded-full cursor-pointer hover:bg-gray-100 focus:outline-none"
+                aria-label="Next days"
               >
-                <path
-                  d="M9 6L15 12L9 18"
-                  stroke="currentColor"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </button>
+                <ChevronRight className="h-5 w-5" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -162,11 +143,12 @@ export const InlineCalendar: React.FC<InlineCalendarProps> = ({
               <div
                 className={`
                   flex items-center justify-center w-12 h-12 mb-1 rounded-full
+                  ${day.isToday ? "border-2 border-black" : ""}
                   ${day.isSelected ? "border-2 border-black" : ""}
                   ${day.isSelected ? "bg-black text-white" : "bg-gray-100"}
                 `}
               >
-                <span className="text-xl font-medium">{day.date}</span> 
+                <span className="text-xl font-medium">{day.date}</span>
                 {day.isToday && (
                   <div className="absolute bottom-[26px] w-1 h-1 rounded-full bg-white"></div>
                 )}

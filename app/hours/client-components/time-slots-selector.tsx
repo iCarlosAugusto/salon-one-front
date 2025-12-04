@@ -6,10 +6,10 @@ import { cn } from "@/lib/utils";
 import { useBookingStore } from "@/lib/store/flow-booking-store";
 
 export function TimeSlotsSelector() {
-  const { 
-    date, 
-    selectedTime, 
-    setTime, 
+  const {
+    date,
+    selectedTime,
+    setTime,
     services,
   } = useBookingStore();
 
@@ -57,7 +57,7 @@ export function TimeSlotsSelector() {
           throw new Error(`Failed to fetch time slots: ${response.status}`);
         }
 
-        const slots = await response.json() as {employeeId: string, availableSlots: string[], employeeName: string}[];
+        const slots = await response.json() as { employeeId: string, availableSlots: string[], employeeName: string }[];
         setTimeSlots(slots.flatMap(slot => slot.availableSlots));
       } catch (err) {
         console.error("Error fetching time slots:", err);
@@ -130,7 +130,7 @@ export function TimeSlotsSelector() {
           <div
             key={i}
             className="h-14 w-full animate-pulse rounded-2xl bg-slate-100"
-            style={{ 
+            style={{
               animationDelay: `${i * 100}ms`,
               animationDuration: '1s'
             }}
@@ -184,25 +184,27 @@ export function TimeSlotsSelector() {
       <h3 className="text-sm font-semibold text-slate-900">
         Horários disponíveis ({timeSlots.length})
       </h3>
-      {timeSlots.map((time, index) => (
-        <button
-          key={time}
-          onClick={() => handleTimeSelect(time)}
-          style={{ 
-            animationDelay: `${index * 50}ms`,
-            animationDuration: '300ms'
-          }}
-          className={cn(
-            "w-full rounded-2xl border-2 px-6 py-4 text-left text-base font-medium transition-all",
-            "animate-in fade-in slide-in-from-left-2",
-            selectedTime === time
-              ? "border-indigo-600 bg-indigo-50 text-indigo-900 shadow-sm ring-2 ring-indigo-600/20"
-              : "border-slate-200 bg-white text-slate-900 hover:border-indigo-200 hover:bg-indigo-50/50 hover:scale-[1.02] active:scale-95"
-          )}
-        >
-          {time}
-        </button>
-      ))}
+      <div className="grid grid-cols-3 md:grid-cols-5 gap-2">
+        {timeSlots.map((time, index) => (
+          <button
+            key={time}
+            onClick={() => handleTimeSelect(time)}
+            style={{
+              animationDelay: `${index * 50}ms`,
+              animationDuration: '300ms'
+            }}
+            className={cn(
+              "w-full rounded-2xl border-2 px-6 py-4 text-left text-base font-medium transition-all",
+              "animate-in fade-in slide-in-from-left-2",
+              selectedTime === time
+                ? "border-indigo-600 bg-indigo-50 text-indigo-900 shadow-sm ring-2 ring-indigo-600/20"
+                : "border-slate-200 bg-white text-slate-900 hover:border-indigo-200 hover:bg-indigo-50/50 hover:scale-[1.02] active:scale-95"
+            )}
+          >
+            {time}
+          </button>
+        ))}
+      </div>
     </div>
   );
 }
