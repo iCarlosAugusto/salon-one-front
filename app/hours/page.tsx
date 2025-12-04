@@ -1,5 +1,3 @@
-import { ArrowLeft, X } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import { CalendarSelector } from "./client-components/calendar-selector";
 import { TimeSlotsSelector } from "./client-components/time-slots-selector";
 import { EmployeeSelector } from "./client-components/employee-selector";
@@ -14,24 +12,8 @@ export default async function HoursPage() {
       <HoursProvider />
       <>
         {/* Mobile Header */}
-        <div className="mb-6 flex items-center justify-between lg:hidden">
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-10 w-10 rounded-full"
-          >
-            <ArrowLeft className="h-5 w-5" />
-            <span className="sr-only">Voltar</span>
-          </Button>
+        <div className="mb-6lg:hidden">
           <h1 className="text-xl font-semibold text-slate-900">Selecionar horário</h1>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-10 w-10 rounded-full"
-          >
-            <X className="h-5 w-5" />
-            <span className="sr-only">Fechar</span>
-          </Button>
         </div>
 
         <div className="flex flex-col gap-6 lg:flex-row lg:gap-10">
