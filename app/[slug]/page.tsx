@@ -88,16 +88,6 @@ export default async function SalonPage({ params }: { params: Promise<{ slug: st
         <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 text-slate-900">
             <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-12 lg:px-8 lg:py-16">
                 <header className="space-y-6">
-                    <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
-                        <span className="inline-flex items-center gap-1 rounded-full bg-white px-3 py-1 ring-1 ring-slate-200">
-                            <Store className="h-4 w-4 text-primary" /> Barbearia referência
-                        </span>
-                        <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:inline-flex" />
-                        <span>{salon.city ?? "Cidade"}</span>
-                        <span className="hidden h-1 w-1 rounded-full bg-slate-300 sm:inline-flex" />
-                        <span>{salon.state ?? "Estado"}</span>
-                    </div>
-
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
