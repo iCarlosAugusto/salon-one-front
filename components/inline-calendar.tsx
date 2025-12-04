@@ -43,7 +43,7 @@ export const InlineCalendar: React.FC<InlineCalendarProps> = ({
         date: date.getDate(),
         day: dayName,
         isToday: date.toDateString() === today.toDateString(),
-        isSelected: date.toDateString() === selectedDate.toDateString(),
+        isSelected: selectedDate ? date.toDateString() === selectedDate.toDateString() : false,
         isDisabled: date < today,
         fullDate: date,
       });
