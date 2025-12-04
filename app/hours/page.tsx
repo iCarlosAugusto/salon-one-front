@@ -1,6 +1,5 @@
 import { ArrowLeft, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { BookingTimer } from "@/components/booking-timer";
 import { CalendarSelector } from "./client-components/calendar-selector";
 import { TimeSlotsSelector } from "./client-components/time-slots-selector";
 import { EmployeeSelector } from "./client-components/employee-selector";
@@ -42,9 +41,6 @@ export default async function HoursPage() {
             <h1 className="hidden text-3xl font-semibold text-slate-900 lg:block">
               Selecionar horário
             </h1>
-
-            {/* Booking Timer */}
-            <BookingTimer />
 
             {/* Employee Selector */}
             <EmployeeSelector />
