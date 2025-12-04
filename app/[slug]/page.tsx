@@ -2,7 +2,6 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import {
     BadgeCheck,
-    Clock3,
     Globe2,
     MapPin,
     Phone,
@@ -99,24 +98,6 @@ export default async function SalonPage({ params }: { params: Promise<{ slug: st
                         <span>{salon.state ?? "Estado"}</span>
                     </div>
 
-                    <div className="grid gap-6 lg:grid-cols-5">
-                        <div className="lg:col-span-3">
-                            <div className="relative overflow-hidden rounded-3xl bg-slate-100 shadow-md">
-                                <Image
-                                    src={
-                                        salon.coverImage ??
-                                        "https://images.unsplash.com/photo-1503951914875-452162b0f3f1?auto=format&fit=crop&w=1600&q=80"
-                                    }
-                                    alt="Espaço da barbearia"
-                                    width={1200}
-                                    height={700}
-                                    className="h-[340px] w-full object-cover"
-                                    priority
-                                />
-                            </div>
-                        </div>
-                    </div>
-
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
                         <div className="space-y-2">
                             <div className="flex flex-wrap items-center gap-3 text-sm text-slate-500">
@@ -150,9 +131,7 @@ export default async function SalonPage({ params }: { params: Promise<{ slug: st
                 <div className="grid gap-8 lg:grid-cols-[2fr_1fr] lg:items-start">
                     <section className="space-y-6">
                         <div className="flex flex-col gap-2">
-                            <p className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">Serviços</p>
-                            <h2 className="text-2xl font-semibold">Selecione e agende</h2>
-                            <p className="text-sm text-slate-500">Transparência em preços, duração e disponibilidade.</p>
+                            <h2 className="text-2xl font-semibold mb">Serviços</h2>
                         </div>
 
                         <div className="space-y-4">
@@ -200,15 +179,6 @@ export default async function SalonPage({ params }: { params: Promise<{ slug: st
                                 <p className="text-sm text-slate-500">Localização e informações úteis para sua visita.</p>
                             </div>
                             <div className="overflow-hidden rounded-3xl bg-white shadow-md ring-1 ring-slate-100">
-                                <div className="h-72 w-full">
-                                    <Image
-                                        src="https://images.unsplash.com/photo-1528909514045-2fa4ac7a08ba?auto=format&fit=crop&w=1600&q=80"
-                                        alt="Mapa e região da barbearia"
-                                        width={1400}
-                                        height={900}
-                                        className="h-full w-full object-cover"
-                                    />
-                                </div>
                                 <div className="grid gap-6 border-t border-slate-100 p-6 md:grid-cols-2">
                                     <div className="space-y-2 text-sm text-slate-600">
                                         <p className="font-semibold text-slate-800">Endereço</p>

@@ -11,7 +11,6 @@ import {
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Employee, Service } from "@/interfaces";
@@ -25,27 +24,26 @@ import {
   UserRound,
   Users,
 } from "lucide-react";
-import { useAppointmentStore } from "@/lib/store/flow-booking-store";
 
 interface ServiceCardSelectableEmployeeProps {
-    service: Service;
-    selectedEmployee: Employee | null;
+  service: Service;
+  selectedEmployee: Employee | null;
 }
 
 const formatDuration = (minutes: number) => {
-    if (minutes < 60) return `${minutes} min`;
-    const hours = Math.floor(minutes / 60);
-    const remaining = minutes % 60;
-    if (remaining === 0) return `${hours} h`;
-    return `${hours} h ${remaining} min`;
-  };
-  
-  const formatCurrency = (value: number, currency: string | null = "BRL") =>
-    new Intl.NumberFormat("pt-BR", {
-      style: "currency",
-      currency: currency ?? "BRL",
-      minimumFractionDigits: 2,
-    }).format(value);
+  if (minutes < 60) return `${minutes} min`;
+  const hours = Math.floor(minutes / 60);
+  const remaining = minutes % 60;
+  if (remaining === 0) return `${hours} h`;
+  return `${hours} h ${remaining} min`;
+};
+
+const formatCurrency = (value: number, currency: string | null = "BRL") =>
+  new Intl.NumberFormat("pt-BR", {
+    style: "currency",
+    currency: currency ?? "BRL",
+    minimumFractionDigits: 2,
+  }).format(value);
 
 export default function ServiceCardSelectableEmployee({ service, selectedEmployee }: ServiceCardSelectableEmployeeProps) {
   const {
@@ -54,9 +52,6 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
     addEmployeeToService,
     removeEmployeeFromService,
   } = useBookingStore();
-
-  const { addService, selectedEmployee: selectedEmployeeAppointment, date, services } = useAppointmentStore();
-
   const selectedServiceEntry = useBookingStore((state) =>
     state.services.find((s) => s.id === service.id)
   );
@@ -115,18 +110,15 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
   }, [isDialogOpen, service.id]);
 
   const handleSelectEmployee = (employee: Employee | null) => {
-    if(employee) {
+    if (employee) {
       addEmployeeToService(service.id, employee);
     }
+    setIsDialogOpen(false);
+  };
 
-    // if (!isSelected) {
-    //   toggleService(service, employee);
-    // } else if (employee) {
-    //   addEmployeeToService(service.id, employee);
-    // } else {
-    //   removeEmployeeFromService(service.id);
-    // }
-    // setIsDialogOpen(false);
+  const clearEmployeeSelection = (serviceId: string) => {
+    removeEmployeeFromService(serviceId);
+    setIsDialogOpen(false);
   };
 
   const getEmployeeInitials = (employee: Employee) =>
@@ -137,7 +129,7 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
       <div
         role="button"
         aria-pressed={isSelected}
-        onClick={() => addService({ ...service })}
+        onClick={() => toggleService(service)}
         className={cn(
           "group w-full flex flex-col gap-3 rounded-xl border p-4 text-left transition-all",
           "hover:-translate-y-0.5 hover:shadow-md",
@@ -148,7 +140,7 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
       >
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 space-y-1">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 justify-between">
               <p className="text-lg font-semibold text-slate-900">{service.name}</p>
               {isSelected && (
                 <span className="flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-white">
@@ -170,27 +162,36 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
           </div>
         </div>
 
-        <DialogTrigger asChild>
-          <Button
-            type="button"
-            variant="outline"
-            size="lg"
-            onClick={(event) => event.stopPropagation()}
-            className={cn(
-              "justify-start rounded-full border-slate-200 bg-white px-4 py-2 text-base font-medium text-slate-800 shadow-sm hover:bg-slate-50",
-              "transition-colors",
-              !currentEmployee && "ring-1 ring-indigo-200"
-            )}
-          >
-            <span className="flex size-9 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
-              <UserRound className="h-5 w-5" />
-            </span>
-            <span className="flex-1 text-left">
-              {currentEmployee ? `${currentEmployee.firstName} ${currentEmployee.lastName}` : "Qualquer profissional"}
-            </span>
-            <ChevronDown className="h-5 w-5 text-slate-500" />
-          </Button>
-        </DialogTrigger>
+        <Button
+          type="button"
+          variant="outline"
+          size="default"
+          onClick={(event) => {
+            event.stopPropagation();
+            if (isSelected) {
+              setIsDialogOpen(true);
+            }
+
+          }}
+          className={cn(
+            "justify-start w-1/2 rounded-full border-slate-200 bg-white px-4 py-5 text-base font-medium text-slate-800 shadow-sm hover:bg-slate-50",
+            "transition-colors",
+            !currentEmployee && "ring-1 ring-indigo-200"
+          )}
+        >
+          <span className="flex size-9 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+            {currentEmployee ? <Avatar className="size-9">
+              <AvatarImage src={currentEmployee.avatar ?? undefined} alt={`${currentEmployee.firstName} ${currentEmployee.lastName}`} />
+              <AvatarFallback className="bg-slate-100 text-slate-700">
+                {getEmployeeInitials(currentEmployee)}
+              </AvatarFallback>
+            </Avatar> : <Users className="h-5 w-5" />}
+          </span>
+          <span className="flex-1 text-left">
+            {currentEmployee ? `${currentEmployee.firstName} ${currentEmployee.lastName}` : "Qualquer profissional"}
+          </span>
+          <ChevronDown className="h-5 w-5 text-slate-500" />
+        </Button>
       </div>
 
       <DialogContent className="max-w-3xl gap-6 rounded-2xl p-0 sm:max-w-3xl">
@@ -208,7 +209,7 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
         <ScrollArea className="max-h-[70vh] px-6 pb-6">
           <div className="space-y-3">
             <button
-              onClick={() => handleSelectEmployee(null)}
+              onClick={() => clearEmployeeSelection(service.id)}
               className={cn(
                 "flex w-full items-center gap-4 rounded-2xl border p-4 text-left transition-all",
                 "hover:border-indigo-300 hover:shadow-[0_12px_36px_-24px_rgba(99,102,241,0.4)]",
@@ -274,7 +275,6 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
                       </span>
                     )}
                     <Button
-                      type="button"
                       variant="outline"
                       className="rounded-full px-5"
                       onClick={() => handleSelectEmployee(employee)}

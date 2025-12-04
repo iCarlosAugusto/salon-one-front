@@ -1,6 +1,5 @@
 "use client";
 
-import React from 'react'
 import Link from 'next/link'
 import { Card, CardTitle, CardDescription } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
