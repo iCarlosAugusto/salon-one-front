@@ -1,6 +1,6 @@
 import { UserRound, ChevronRight } from "lucide-react";
 import Link from "next/link";
-import { MobileBottomBar } from "../[slug]/components/mobile-bottom-bar";
+
 
 export default async function ProfilePage() {
 
@@ -17,7 +17,6 @@ export default async function ProfilePage() {
                     <ChevronRight className="h-4 w-4" />
                 </Link>
             </div>
-            <MobileBottomBar slug={"barber-top"} />
         </div>
     );
 }
