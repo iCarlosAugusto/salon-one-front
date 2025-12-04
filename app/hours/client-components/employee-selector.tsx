@@ -1,12 +1,10 @@
 "use client";
 
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
-import { Calendar } from "lucide-react";
 import { useBookingStore } from "@/lib/store/flow-booking-store";
 
 export function EmployeeSelector() {
-  const { services, selectedEmployee } = useBookingStore();
+  const { services } = useBookingStore();
   const employees = services.map((service) => service.employeeSelected);
 
   return (
