@@ -127,8 +127,8 @@ export function BookingSummary({
             </div>
           ) : (
             services.map((service, index) => (
-              <>
-                <div className="space-y-0.5" key={index}>
+              <div key={index}>
+                <div className="space-y-0.5">
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-slate-900">{service.name}</span>
                     <span className="text-sm font-semibold text-slate-900">
@@ -139,7 +139,7 @@ export function BookingSummary({
                   <p className="text-xs text-slate-500">{formatDuration(service.duration)} com {service.employeeSelected?.firstName ?? "Qualquer profissional"}</p>
                 </div>
                 <Separator />
-              </>
+              </div>
             ))
           )}
         </div>
