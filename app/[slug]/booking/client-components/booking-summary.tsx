@@ -5,9 +5,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button";
 import { useBookingStore } from "@/lib/store/flow-booking-store";
 import { useRouter, usePathname } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useCallback } from "react";
 import { useAuth } from "@/lib/hooks/use-auth";
-import { GetBasicInfoDialog } from "@/components/ui/get-basic-info-dialog";
+import { AuthenticationOTPDialog } from "@/components/ui/authentication-otp-dialog";
 import { Separator } from "@/components/ui/separator";
 
 const formatCurrency = (value: number, currency: string | null = "BRL") =>
@@ -79,16 +79,30 @@ export function BookingSummary({
     }
   }, [route]);
 
-  const confirmBooking = () => {
+  const confirmBooking = useCallback(() => {
+    // TODO: Implement actual booking submission to backend
+    console.log("Booking confirmed!", {
+      services,
+      totalDuration,
+      totalPrice,
+    });
+    // After successful booking, you can redirect to a success page
+    // router.push(`/${slug}/success`);
+  }, [services, totalDuration, totalPrice]);
 
-  }
+  const handleAuthSuccess = useCallback(() => {
+    // After successful authentication, submit the booking
+    confirmBooking();
+  }, [confirmBooking]);
 
   const handleShowModalAuth = () => {
-    if (!isAuthenticated) {
-      setShowModalAuth(true);
+    if (isAuthenticated) {
+      // User is already authenticated, submit booking directly
+      confirmBooking();
       return;
     }
-
+    // Show auth dialog
+    setShowModalAuth(true);
   };
 
   return (
@@ -112,9 +126,9 @@ export function BookingSummary({
               <p className="text-sm text-slate-500">Nenhum serviço selecionado</p>
             </div>
           ) : (
-            services.map((service) => (
+            services.map((service, index) => (
               <>
-                <div className="space-y-0.5">
+                <div className="space-y-0.5" key={index}>
                   <div className="flex items-center justify-between">
                     <span className="text-sm font-semibold text-slate-900">{service.name}</span>
                     <span className="text-sm font-semibold text-slate-900">
@@ -164,9 +178,10 @@ export function BookingSummary({
         </Button>
       </CardContent>
 
-      <GetBasicInfoDialog
+      <AuthenticationOTPDialog
         open={showModalAuth}
         onOpenChange={setShowModalAuth}
+        onAuthSuccess={handleAuthSuccess}
       />
     </Card>
   );
