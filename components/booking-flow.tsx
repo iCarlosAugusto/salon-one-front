@@ -4,8 +4,9 @@ import { BookingSummary } from '@/app/[slug]/booking/client-components/booking-s
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card'
 import { MobileBottomBar } from '@/app/[slug]/booking/client-components/mobile-bottom-bar'
 import { ShieldCheck, BadgeCheck } from 'lucide-react'
-import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbLink, BreadcrumbSeparator, BreadcrumbPage } from './ui/breadcrumb'
+import { Breadcrumb, BreadcrumbList, BreadcrumbItem, BreadcrumbSeparator } from './ui/breadcrumb'
 import Link from 'next/link'
+import { BackButton } from './back-button'
 
 async function BookingFlow({ children, pathname }: { children: React.ReactNode, pathname: string }) {
     const slug = "barber-top";
@@ -17,12 +18,7 @@ async function BookingFlow({ children, pathname }: { children: React.ReactNode, 
                     <div className="flex flex-col items-start gap-3">
                         <div className="flex items-center gap-3">
 
-                            <Button variant="ghost" size="icon" className="h-10 w-10 rounded-full border border-slate-200 bg-white">
-                                <span className="sr-only">Voltar</span>
-                                <svg viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" className="h-5 w-5">
-                                    <path d="M15 6l-6 6 6 6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-                                </svg>
-                            </Button>
+                            <BackButton />
                             <div>
                                 <h1 className="text-2xl font-semibold sm:text-3xl">Descubra e agende em poucos toques</h1>
                             </div>
