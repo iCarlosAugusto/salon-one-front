@@ -147,7 +147,7 @@ export default async function SalonPage({ params }: { params: Promise<{ slug: st
 
                             <div className="flex space-x-4 overflow-x-auto">
                                 {employees.map((member) => (
-                                    <Link key={member.firstName} href={`/${salon.slug}/booking?employeeId=${member.id}`} className="center">
+                                    <Link key={member.firstName} href={`/${salon.slug}/services?employeeId=${member.id}`} className="center">
                                         <div className="flex flex-col items-center gap-2">
                                             <Avatar className="h-18 w-18">
                                                 <AvatarImage src={member.avatar ?? ""} alt={member.firstName} />

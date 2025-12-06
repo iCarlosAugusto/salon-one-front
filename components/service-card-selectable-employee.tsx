@@ -28,6 +28,7 @@ import {
 interface ServiceCardSelectableEmployeeProps {
   service: Service;
   selectedEmployee: Employee | null;
+  contextEmployee?: Employee | null; // Employee from URL context (hides selector)
 }
 
 const formatDuration = (minutes: number) => {
@@ -45,7 +46,7 @@ const formatCurrency = (value: number, currency: string | null = "BRL") =>
     minimumFractionDigits: 2,
   }).format(value);
 
-export default function ServiceCardSelectableEmployee({ service, selectedEmployee }: ServiceCardSelectableEmployeeProps) {
+export default function ServiceCardSelectableEmployee({ service, selectedEmployee, contextEmployee }: ServiceCardSelectableEmployeeProps) {
   const {
     toggleService,
     isServiceSelected,
@@ -62,9 +63,16 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
   const isSelected = isServiceSelected(service.id);
 
   const currentEmployee = useMemo(
-    () => selectedServiceEntry?.employeeSelected ?? selectedEmployee,
-    [selectedEmployee, selectedServiceEntry?.employeeSelected]
+    () => selectedServiceEntry?.employeeSelected ?? contextEmployee ?? selectedEmployee,
+    [selectedEmployee, contextEmployee, selectedServiceEntry?.employeeSelected]
   );
+
+  // When in employee context, auto-assign employee when service is selected
+  useEffect(() => {
+    if (contextEmployee && isSelected && !selectedServiceEntry?.employeeSelected) {
+      addEmployeeToService(service.id, contextEmployee);
+    }
+  }, [contextEmployee, isSelected, selectedServiceEntry?.employeeSelected, addEmployeeToService, service.id]);
 
   const fetchEmployeesByServiceId = async (serviceId: string) => {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL;
@@ -164,36 +172,39 @@ export default function ServiceCardSelectableEmployee({ service, selectedEmploye
           </div>
         </div>
 
-        <Button
-          type="button"
-          variant="outline"
-          size="default"
-          onClick={(event) => {
-            event.stopPropagation();
-            if (isSelected) {
-              setIsDialogOpen(true);
-            }
+        {/* Only show employee selector when not in employee context */}
+        {!contextEmployee && (
+          <Button
+            type="button"
+            variant="outline"
+            size="default"
+            onClick={(event) => {
+              event.stopPropagation();
+              if (isSelected) {
+                setIsDialogOpen(true);
+              }
 
-          }}
-          className={cn(
-            "justify-start  w-full md:w-1/2 rounded-full border-slate-200 bg-white px-4 py-5 text-base font-medium text-slate-800 shadow-sm hover:bg-slate-50",
-            "transition-colors",
-            !currentEmployee && "ring-1 ring-indigo-200"
-          )}
-        >
-          <span className="flex size-9 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
-            {currentEmployee ? <Avatar className="size-9">
-              <AvatarImage src={currentEmployee.avatar ?? undefined} alt={`${currentEmployee.firstName} ${currentEmployee.lastName}`} />
-              <AvatarFallback className="bg-slate-100 text-slate-700">
-                {getEmployeeInitials(currentEmployee)}
-              </AvatarFallback>
-            </Avatar> : <Users className="h-5 w-5" />}
-          </span>
-          <span className="flex-1 text-left text-ellipsis overflow-hidden whitespace-nowrap">
-            {currentEmployee ? `${currentEmployee.firstName} ${currentEmployee.lastName}` : "Qualquer profissional"}
-          </span>
-          <ChevronDown className="h-5 w-5 text-slate-500" />
-        </Button>
+            }}
+            className={cn(
+              "justify-start  w-full md:w-1/2 rounded-full border-slate-200 bg-white px-4 py-5 text-base font-medium text-slate-800 shadow-sm hover:bg-slate-50",
+              "transition-colors",
+              !currentEmployee && "ring-1 ring-indigo-200"
+            )}
+          >
+            <span className="flex size-9 items-center justify-center rounded-full bg-indigo-50 text-indigo-600">
+              {currentEmployee ? <Avatar className="size-9">
+                <AvatarImage src={currentEmployee.avatar ?? undefined} alt={`${currentEmployee.firstName} ${currentEmployee.lastName}`} />
+                <AvatarFallback className="bg-slate-100 text-slate-700">
+                  {getEmployeeInitials(currentEmployee)}
+                </AvatarFallback>
+              </Avatar> : <Users className="h-5 w-5" />}
+            </span>
+            <span className="flex-1 text-left text-ellipsis overflow-hidden whitespace-nowrap">
+              {currentEmployee ? `${currentEmployee.firstName} ${currentEmployee.lastName}` : "Qualquer profissional"}
+            </span>
+            <ChevronDown className="h-5 w-5 text-slate-500" />
+          </Button>
+        )}
       </div>
 
       <DialogContent className="max-w-3xl gap-6 rounded-2xl p-0 sm:max-w-3xl">

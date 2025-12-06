@@ -25,9 +25,6 @@ export interface FlowBookingStore {
   toggleService: (service: Service, employee?: Employee | null) => void;
   isServiceSelected: (serviceId: string) => boolean;
 
-  // Employee actions
-  setEmployee: (employee: Employee | null) => void;
-
   // Date and time actions
   setDate: (date: Date | null) => void;
   setTime: (time: string | null) => void;
@@ -50,130 +47,128 @@ export interface FlowBookingStore {
 
 export const useAppointmentStore = create<FlowBookingStore>()(
   persist((set, get) => (
-  {
-  services: [],
-  selectedEmployee: null,
-  date: null,
-  selectedTime: null,
-  salonSlug: null,
-  bookingStartedAt: null,
-  bookingExpiresAt: null,
-  sessionDuration: 5 * 60 * 1000,
-
-  addService: (service, employee = null) =>
-    set((state) => ({
-      services: state.services.some((s) => s.id === service.id)
-        ? state.services
-        : [...state.services, { ...service, employeeSelected: employee }],
-    })),
-
-  removeService: (serviceId) =>
-    set((state) => ({
-      services: state.services.filter((service) => service.id !== serviceId),
-    })),
-
-  addEmployeeToService: (serviceId, employee) =>
-    set((state) => ({
-      services: state.services.map((service) =>
-        service.id === serviceId ? { ...service, employeeSelected: employee } : service
-      ),
-    })),
-
-  removeEmployeeFromService: (serviceId) =>
-    set((state) => ({
-      services: state.services.map((service) =>
-        service.id === serviceId ? { ...service, employeeSelected: null } : service
-      ),
-    })),
-
-  clearServices: () => set({ services: [] }),
-
-  toggleService: (service, employee = null) =>
-    set((state) => {
-      const isSelected = state.services.some((s) => s.id === service.id);
-      return isSelected
-        ? { services: state.services.filter((s) => s.id !== service.id) }
-        : { services: [...state.services, { ...service, employeeSelected: employee }] };
-    }),
-
-  isServiceSelected: (serviceId) => get().services.some((service) => service.id === serviceId),
-
-  setEmployee: (employee) => set({ selectedEmployee: employee }),
-
-  setDate: (date) => set({ date }),
-
-  setTime: (time) => {
-    const now = Date.now();
-    const duration = get().sessionDuration;
-    set({
-      selectedTime: time,
-      bookingStartedAt: now,
-      bookingExpiresAt: now + duration,
-    });
-  },
-
-  setSalonSlug: (slug) => set({ salonSlug: slug }),
-
-  startBookingSession: () => {
-    const now = Date.now();
-    const duration = get().sessionDuration;
-    set({
-      bookingStartedAt: now,
-      bookingExpiresAt: now + duration,
-    });
-  },
-
-  clearExpiredBooking: () => {
-    if (get().isBookingExpired()) {
-      set({
-        selectedTime: null,
-        bookingStartedAt: null,
-        bookingExpiresAt: null,
-      });
-    }
-  },
-
-  isBookingExpired: () => {
-    const expiresAt = get().bookingExpiresAt;
-    if (!expiresAt) return false;
-    return Date.now() > expiresAt;
-  },
-
-  getTimeRemaining: () => {
-    const expiresAt = get().bookingExpiresAt;
-    if (!expiresAt) return 0;
-    const remaining = expiresAt - Date.now();
-    return remaining > 0 ? remaining : 0;
-  },
-
-  extendSession: () => {
-    const now = Date.now();
-    const duration = get().sessionDuration;
-    set({
-      bookingStartedAt: now,
-      bookingExpiresAt: now + duration,
-    });
-  },
-
-  clearBooking: () =>
-    set({
+    {
       services: [],
       selectedEmployee: null,
       date: null,
       selectedTime: null,
+      salonSlug: null,
       bookingStartedAt: null,
       bookingExpiresAt: null,
-    }),
+      sessionDuration: 5 * 60 * 1000,
 
-  getTotalDuration: () => get().services.reduce((total, service) => total + service.duration, 0),
+      addService: (service, employee = null) =>
+        set((state) => ({
+          services: state.services.some((s) => s.id === service.id)
+            ? state.services
+            : [...state.services, { ...service, employeeSelected: employee }],
+        })),
 
-  getTotalPrice: () =>
-    get().services.reduce((total, service) => total + parseFloat(service.price), 0),
-}
-), {
-  name: 'flow-booking-store',
-  storage: createJSONStorage(() => sessionStorage),
-}));
+      removeService: (serviceId) =>
+        set((state) => ({
+          services: state.services.filter((service) => service.id !== serviceId),
+        })),
+
+      addEmployeeToService: (serviceId, employee) =>
+        set((state) => ({
+          services: state.services.map((service) =>
+            service.id === serviceId ? { ...service, employeeSelected: employee } : service
+          ),
+        })),
+
+      removeEmployeeFromService: (serviceId) =>
+        set((state) => ({
+          services: state.services.map((service) =>
+            service.id === serviceId ? { ...service, employeeSelected: null } : service
+          ),
+        })),
+
+      clearServices: () => set({ services: [] }),
+
+      toggleService: (service, employee = null) =>
+        set((state) => {
+          const isSelected = state.services.some((s) => s.id === service.id);
+          return isSelected
+            ? { services: state.services.filter((s) => s.id !== service.id) }
+            : { services: [...state.services, { ...service, employeeSelected: employee }] };
+        }),
+
+      isServiceSelected: (serviceId) => get().services.some((service) => service.id === serviceId),
+
+      setDate: (date) => set({ date }),
+
+      setTime: (time) => {
+        const now = Date.now();
+        const duration = get().sessionDuration;
+        set({
+          selectedTime: time,
+          bookingStartedAt: now,
+          bookingExpiresAt: now + duration,
+        });
+      },
+
+      setSalonSlug: (slug) => set({ salonSlug: slug }),
+
+      startBookingSession: () => {
+        const now = Date.now();
+        const duration = get().sessionDuration;
+        set({
+          bookingStartedAt: now,
+          bookingExpiresAt: now + duration,
+        });
+      },
+
+      clearExpiredBooking: () => {
+        if (get().isBookingExpired()) {
+          set({
+            selectedTime: null,
+            bookingStartedAt: null,
+            bookingExpiresAt: null,
+          });
+        }
+      },
+
+      isBookingExpired: () => {
+        const expiresAt = get().bookingExpiresAt;
+        if (!expiresAt) return false;
+        return Date.now() > expiresAt;
+      },
+
+      getTimeRemaining: () => {
+        const expiresAt = get().bookingExpiresAt;
+        if (!expiresAt) return 0;
+        const remaining = expiresAt - Date.now();
+        return remaining > 0 ? remaining : 0;
+      },
+
+      extendSession: () => {
+        const now = Date.now();
+        const duration = get().sessionDuration;
+        set({
+          bookingStartedAt: now,
+          bookingExpiresAt: now + duration,
+        });
+      },
+
+      clearBooking: () =>
+        set({
+          services: [],
+          selectedEmployee: null,
+          date: null,
+          selectedTime: null,
+          bookingStartedAt: null,
+          bookingExpiresAt: null,
+        }),
+
+      getTotalDuration: () => get().services.reduce((total, service) => total + service.duration, 0),
+
+      getTotalPrice: () =>
+        get().services.reduce((total, service) => total + parseFloat(service.price), 0),
+    }
+  ), {
+    name: 'flow-booking-store',
+    storage: createJSONStorage(() => sessionStorage),
+  }));
 
 // Alias to make the transition from the old store easier
 export const useBookingStore = useAppointmentStore;
