@@ -125,26 +125,25 @@ export function BookingSummary({
   }
 
 
-  const handleConfirm = async (name: string, phone: string) => {
+  const handleConfirm = async (name: string, phone: string): Promise<void> => {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL ?? "http://localhost:3001";
-    console.log("Services: ", services)
-    try {
-      const response = await fetch(`${baseUrl}/appointments`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, clientName: name, clientPhone: phone }),
-      });
+    const response = await fetch(`${baseUrl}/appointments`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, clientName: name, clientPhone: phone }),
+    });
 
-      if (!response.ok) {
-        throw new Error("Não foi possível criar o agendamento.");
-      }
-
-      setStatus("success");
-      clearBooking();
-    } catch (error) {
-      setStatus("error");
-      setErrorMessage(error instanceof Error ? error.message : "Erro ao criar agendamento.");
+    if (!response.ok) {
+      throw new Error("Não foi possível criar o agendamento.");
     }
+
+    // Clear booking and redirect to home
+    clearBooking();
+
+    // Small delay before redirect to let success animation play
+    setTimeout(() => {
+      router.push(`/${slug}`);
+    }, 2000);
   };
 
   const handleAuthSuccess = useCallback(() => {
@@ -229,9 +228,7 @@ export function BookingSummary({
       <GetBasicInfo
         isOpen={showModalBasicInfo}
         onOpenChange={setShowModalBasicInfo}
-        onBasicInfoSubmit={(name, phone) => {
-          handleConfirm(name, phone);
-        }}
+        onBasicInfoSubmit={handleConfirm}
       />
     </Card>
   );
