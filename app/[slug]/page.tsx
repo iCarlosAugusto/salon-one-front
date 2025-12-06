@@ -8,15 +8,14 @@ import {
     Share2,
     ShieldCheck,
     Sparkles,
-    Star,
-    Store,
+    Star
 } from "lucide-react";
-import Image from "next/image";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import Link from "next/link";
 import { Salon, Employee, Service } from "@/interfaces";
 import { ServiceCard } from "@/components/service-card";
+import { BookingCleaner } from "@/components/booking-cleaner";
 
 
 async function getSalonBySlug(slug: string): Promise<Salon> {
@@ -86,6 +85,7 @@ export default async function SalonPage({ params }: { params: Promise<{ slug: st
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-slate-50 via-white to-slate-100 text-slate-900">
+            <BookingCleaner />
             <div className="mx-auto flex max-w-6xl flex-col gap-10 px-6 py-12 lg:px-8 lg:py-16">
                 <header className="space-y-6">
                     <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">

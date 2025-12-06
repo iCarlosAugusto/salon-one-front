@@ -18,7 +18,7 @@ const formatCurrency = (value: string | number, currency: string | null = "BRL")
 export function ServiceCard({ service, slug }: { service: Service, slug: string }) {
 
     const router = useRouter();
-    
+
     const handleClick = () => {
         router.push(`/${slug}/professionals?serviceId=${service.id}`);
     }
