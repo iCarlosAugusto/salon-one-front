@@ -65,8 +65,8 @@ export default async function Booking({ searchParams }: { searchParams: Promise<
 
   return (
     <BookingFlow pathname={pathname}>
-      {/* Booking Provider - sets employee in store */}
-      <BookingProvider employee={employee} salonSlug={salon?.slug} />
+      {/* Booking Provider - sets salon slug in store */}
+      <BookingProvider salonSlug={salon?.slug} />
 
       <div className="flex flex-1 flex-col gap-6">
         <div className="space-y-6" id="services">

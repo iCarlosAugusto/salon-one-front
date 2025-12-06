@@ -15,6 +15,7 @@ export interface FlowBookingStore {
   bookingStartedAt: number | null;
   bookingExpiresAt: number | null;
   sessionDuration: number;
+  navigationHistory: string[]; // Stack of full URLs for back navigation
 
   // Service actions
   addService: (service: Service, employee?: Employee | null) => void;
@@ -39,6 +40,11 @@ export interface FlowBookingStore {
   getTimeRemaining: () => number;
   extendSession: () => void;
 
+  // Navigation
+  pushNavigation: (url: string) => void;
+  popNavigation: () => string | null;
+  getBackUrl: () => string | null;
+
   // Derived
   clearBooking: () => void;
   getTotalDuration: () => number;
@@ -56,6 +62,7 @@ export const useAppointmentStore = create<FlowBookingStore>()(
       bookingStartedAt: null,
       bookingExpiresAt: null,
       sessionDuration: 5 * 60 * 1000,
+      navigationHistory: [],
 
       addService: (service, employee = null) =>
         set((state) => ({
@@ -150,6 +157,24 @@ export const useAppointmentStore = create<FlowBookingStore>()(
         });
       },
 
+      pushNavigation: (url) =>
+        set((state) => ({
+          navigationHistory: [...state.navigationHistory, url],
+        })),
+
+      popNavigation: () => {
+        const history = get().navigationHistory;
+        if (history.length === 0) return null;
+        const lastUrl = history[history.length - 1];
+        set({ navigationHistory: history.slice(0, -1) });
+        return lastUrl;
+      },
+
+      getBackUrl: () => {
+        const history = get().navigationHistory;
+        return history.length > 0 ? history[history.length - 1] : null;
+      },
+
       clearBooking: () =>
         set({
           services: [],
@@ -158,6 +183,7 @@ export const useAppointmentStore = create<FlowBookingStore>()(
           selectedTime: null,
           bookingStartedAt: null,
           bookingExpiresAt: null,
+          navigationHistory: [],
         }),
 
       getTotalDuration: () => get().services.reduce((total, service) => total + service.duration, 0),

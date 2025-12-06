@@ -2,8 +2,10 @@
 
 import { useRouter, usePathname } from "next/navigation";
 import { Button } from "./ui/button";
+import { useBookingStore } from "@/lib/store/flow-booking-store";
 
-const FLOW_STEPS: Record<string, string> = {
+// Fallback steps when no navigation history is available
+const FALLBACK_STEPS: Record<string, string> = {
     hours: "services",
     confirmation: "hours",
 };
@@ -11,19 +13,28 @@ const FLOW_STEPS: Record<string, string> = {
 export function BackButton() {
     const router = useRouter();
     const pathname = usePathname();
+    const { popNavigation, getBackUrl } = useBookingStore();
 
     const handleBack = () => {
         const segments = pathname.split("/");
         const slug = segments[1];
         const currentStep = segments[2];
 
-        const previousStep = FLOW_STEPS[currentStep];
+        // First, try to get the previous URL from navigation history
+        const backUrl = popNavigation();
 
-        if (previousStep) {
-            router.push(`/${slug}/${previousStep}`);
+        if (backUrl) {
+            // Navigate to the stored URL (preserves query params)
+            router.push(backUrl);
         } else {
-            // Fallback: go to salon home page
-            router.push(`/${slug}`);
+            // Fallback: use static step mapping without query params
+            const previousStep = FALLBACK_STEPS[currentStep];
+            if (previousStep) {
+                router.push(`/${slug}/${previousStep}`);
+            } else {
+                // Ultimate fallback: go to salon home page
+                router.push(`/${slug}`);
+            }
         }
     };
 

@@ -44,7 +44,7 @@ export function BookingSummary({
 
   const pathname = usePathname();
   const router = useRouter();
-  const { getTotalDuration, getTotalPrice, selectedEmployee, date, clearBooking, services, selectedTime } = useBookingStore();
+  const { getTotalDuration, getTotalPrice, selectedEmployee, date, clearBooking, services, selectedTime, pushNavigation } = useBookingStore();
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -57,6 +57,10 @@ export function BookingSummary({
   const slug = pathname.split('/')[1];
 
   const handleContinue = () => {
+    // Push current URL to navigation history before navigating
+    const currentUrl = window.location.pathname + window.location.search;
+    pushNavigation(currentUrl);
+
     switch (route) {
       case "booking":
         router.push(`/${slug}/hours`);
