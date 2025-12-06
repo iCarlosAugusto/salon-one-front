@@ -23,7 +23,7 @@ export function TimeSlotsSelector() {
 
   useEffect(() => {
     // Reset slots when date changes or is cleared
-    if (!date || services.length === 0 || !employeeIds) {
+    if (!date || services.length === 0) {
       setTimeSlots([]);
       setError(null);
       return;
@@ -106,20 +106,6 @@ export function TimeSlotsSelector() {
     );
   }
 
-  // No employee selected state
-  if (!employeeIds) {
-    return (
-      <div className="rounded-xl bg-slate-50 p-8 text-center animate-in fade-in">
-        <Calendar className="mx-auto mb-3 h-12 w-12 text-slate-300" />
-        <p className="text-sm font-medium text-slate-600">
-          Nenhum profissional selecionado
-        </p>
-        <p className="mt-1 text-xs text-slate-500">
-          Volte e selecione um profissional para cada serviço
-        </p>
-      </div>
-    );
-  }
 
   // Loading state
   if (loading) {

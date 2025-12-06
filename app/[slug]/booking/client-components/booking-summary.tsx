@@ -7,8 +7,8 @@ import { useBookingStore } from "@/lib/store/flow-booking-store";
 import { useRouter, usePathname } from "next/navigation";
 import { useMemo, useState, useCallback } from "react";
 import { useAuth } from "@/lib/hooks/use-auth";
-import { AuthenticationOTPDialog } from "@/components/ui/authentication-otp-dialog";
 import { Separator } from "@/components/ui/separator";
+import { GetBasicInfo } from "@/components/get-basic-info";
 
 const formatCurrency = (value: number, currency: string | null = "BRL") =>
   new Intl.NumberFormat("pt-BR", {
@@ -41,10 +41,14 @@ export function BookingSummary({
   currency,
 }: BookingSummaryProps) {
   const { user, isAuthenticated, isLoading: isAuthLoading, signOut } = useAuth();
-  const [showModalAuth, setShowModalAuth] = useState(false);
+
   const pathname = usePathname();
   const router = useRouter();
-  const { services, getTotalDuration, getTotalPrice } = useBookingStore();
+  const { getTotalDuration, getTotalPrice, selectedEmployee, date, clearBooking, services, selectedTime } = useBookingStore();
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  const [showModalBasicInfo, setShowModalBasicInfo] = useState(false);
 
   const totalDuration = getTotalDuration();
   const totalPrice = getTotalPrice();
@@ -90,20 +94,60 @@ export function BookingSummary({
     // router.push(`/${slug}/success`);
   }, [services, totalDuration, totalPrice]);
 
+
+  const payload = useMemo(() => {
+    const appointmentDate = date ? new Date(date).toISOString().split("T")[0] : null;
+    const salonId = services[0]?.salonId ?? null;
+    const bodyServices = services
+      .map((service) => ({
+        serviceId: service.id,
+        employeeId: (service.employeeSelected ?? selectedEmployee)?.id ?? null,
+      }))
+
+    return {
+      salonId,
+      services: bodyServices,
+      appointmentDate,
+      startTime: selectedTime,
+      clientName: user?.user_metadata?.full_name ?? "Cliente",
+      clientPhone: user?.phone ?? "",
+      clientEmail: user?.email ?? "teste@teste.com",
+      userId: user?.id,
+    };
+  }, [date, selectedEmployee, selectedTime, services, user]);
+
+  const handleConfirmBooking = () => {
+    setShowModalBasicInfo(true);
+  }
+
+
+  const handleConfirm = async (name: string, phone: string) => {
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ?? process.env.BASE_URL ?? "http://localhost:3001";
+    console.log("Services: ", services)
+    try {
+      const response = await fetch(`${baseUrl}/appointments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...payload, clientName: name, clientPhone: phone }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Não foi possível criar o agendamento.");
+      }
+
+      setStatus("success");
+      clearBooking();
+    } catch (error) {
+      setStatus("error");
+      setErrorMessage(error instanceof Error ? error.message : "Erro ao criar agendamento.");
+    }
+  };
+
   const handleAuthSuccess = useCallback(() => {
     // After successful authentication, submit the booking
     confirmBooking();
   }, [confirmBooking]);
 
-  const handleShowModalAuth = () => {
-    if (isAuthenticated) {
-      // User is already authenticated, submit booking directly
-      confirmBooking();
-      return;
-    }
-    // Show auth dialog
-    setShowModalAuth(true);
-  };
 
   return (
     <Card className="overflow-hidden border-slate-200 shadow-[0_18px_60px_-28px_rgba(15,23,42,0.32)]">
@@ -170,7 +214,7 @@ export function BookingSummary({
 
         {/* Continue Button */}
         <Button
-          onClick={route === "confirmation" ? handleShowModalAuth : handleContinue}
+          onClick={route === "confirmation" ? handleConfirmBooking : handleContinue}
           disabled={services.length === 0}
           className="w-full rounded-full bg-indigo-600 text-base font-semibold transition-all hover:bg-indigo-700 hover:scale-[1.02] disabled:scale-100 disabled:bg-slate-300 disabled:cursor-not-allowed"
         >
@@ -178,11 +222,14 @@ export function BookingSummary({
         </Button>
       </CardContent>
 
-      <AuthenticationOTPDialog
-        open={showModalAuth}
-        onOpenChange={setShowModalAuth}
-        onAuthSuccess={handleAuthSuccess}
+      <GetBasicInfo
+        isOpen={showModalBasicInfo}
+        onOpenChange={setShowModalBasicInfo}
+        onBasicInfoSubmit={(name, phone) => {
+          handleConfirm(name, phone);
+        }}
       />
     </Card>
   );
 }
+
